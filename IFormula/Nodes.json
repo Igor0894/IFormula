@@ -1,0 +1,8 @@
+[
+  {
+    "SearchAttribute": "CENG.Формула",
+    "SearchModel": "*",
+    "SearchTemplate": "*",
+    "cronExpression": "0 0/1 * ? * *"
+  }
+]
