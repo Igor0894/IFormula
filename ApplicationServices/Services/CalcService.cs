@@ -100,6 +100,7 @@ namespace ApplicationServices.Services
         }
         private async Task RecalcSchedulle(DateTime startTime, DateTime endTime)
         {
+            if(schedulledCalcsHandler.CalcElements.Count == 0) { return; }
             var crontabOptions = new CrontabSchedule.ParseOptions();
             crontabOptions.IncludingSeconds = true;
             var schedule = CrontabSchedule.Parse(Node.cronExpression.Replace("?", "*"), crontabOptions);

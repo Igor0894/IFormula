@@ -159,6 +159,7 @@ namespace ApplicationServices.Calculator
         }
         public async Task RecalcTriggeredElements(DateTime startTime, DateTime endTime)
         {
+            if (CalcElements.Count == 0) { return; }
             Prepair(CalcMode.Recalc);
             try
             {
