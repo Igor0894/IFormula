@@ -23,17 +23,21 @@ namespace ApplicationServices.Services
             TsdbWorker = tsdbWorker;
             TsdbWorker.logger = tsdbClientLogger;
         }
-        private ConcurrentDictionary<string, CalcService> SchedulledCalcServices { get; set; } = new ConcurrentDictionary<string, CalcService>();
-        public async Task AddSchedulledCalcService(CalcNode node)
+        private ConcurrentDictionary<string, CalcService> CalcServices { get; set; } = new ConcurrentDictionary<string, CalcService>();
+        public async Task AddCalcService(CalcNode node)
         {
             CalcService calcService = new(CalcServiceLogger, CalcHandlerLogger, ConnectionString, node, TsdbWorker);
             await calcService.InitializeModel(CalcMode.Schedulled);
-            if (SchedulledCalcServices.ContainsKey(node.SearchAttribute)) { SchedulledCalcServices[node.SearchAttribute] = calcService; }
-            else { SchedulledCalcServices.TryAdd(node.SearchAttribute, calcService); }
+            if (CalcServices.ContainsKey(node.SearchAttribute)) { CalcServices[node.SearchAttribute] = calcService; }
+            else { CalcServices.TryAdd(node.SearchAttribute, calcService); }
+        }
+        public void DeleteCalcService(string name)
+        {
+            if (CalcServices.ContainsKey(name)) { CalcServices.TryRemove(name, out CalcService calcService); }
         }
         public CalcService GetSchedulledAndTriggeredCalcService(string name)
         {
-            return SchedulledCalcServices[name];
+            return CalcServices[name];
         }
         public async Task<CalcService> GetRecalcCalcService(CalcNode node)
         {

@@ -28,22 +28,43 @@ namespace ApplicationServices.Services
         }
         public async Task<IResult> AddOrStartNode(string name)
         {
+            await TryDeleteJobs(name);
+            await StartJob(name);
+            return Results.Ok();
+        }
+        public async Task<IResult> StopNode(string name)
+        {
+            if (await TryDeleteJobs(name))
+            {
+                Logger.LogInformation($"Остановлен узел расчёта: {name}");
+            }
+            else
+            {
+                throw new Exception($"Указанный узел расчёта не запущен: {name}");
+            }
+            return Results.Ok();
+        }
+        private async Task<bool> TryDeleteJobs(string name)
+        {
+            bool stopped = false;
             scheduler = await StdSchedulerFactory.GetDefaultScheduler();
             scheduler.JobFactory = JobFactory;
             var groupMatcher = GroupMatcher<TriggerKey>.GroupContains("Nodes");
             var executingTriggers = await scheduler.GetTriggerKeys(groupMatcher);
-            if (executingTriggers.Any(j => j.Name == name)) 
+            if (executingTriggers.Any(j => j.Name == name))
             {
                 await scheduler.DeleteJob(new JobKey(name + " schedulle"));
+                stopped = true;
             }
             groupMatcher = GroupMatcher<TriggerKey>.GroupContains("TriggerNodes");
             executingTriggers = await scheduler.GetTriggerKeys(groupMatcher);
             if (executingTriggers.Any(j => j.Name == name))
             {
                 await scheduler.DeleteJob(new JobKey(name + " trigger"));
+                stopped = true;
             }
-            await StartJob(name);
-            return Results.Ok();
+            CalcServiceCollector.DeleteCalcService(name);
+            return stopped;
         }
         public async Task<IResult> RecalcNode(string name, string startTimeLocal, string endTimeLocal)
         {
@@ -108,7 +129,7 @@ namespace ApplicationServices.Services
                     Logger.LogError($"В файле Nodes.json XML некорректного формата");
                 }
             }
-            await CalcServiceCollector.AddSchedulledCalcService(node);
+            await CalcServiceCollector.AddCalcService(node);
             return node;
         }
         private async Task<CalcService> GetCalcService(string name)

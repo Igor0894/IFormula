@@ -15,10 +15,15 @@ namespace IFormula.Controllers
             this.ManageNodeService = ManageNodeService;
 
         }
-        [HttpPost("AddOrRestart")]
-        public async Task<IResult> AddOrRestart(string name)
+        [HttpPost("AddOrRestartNode")]
+        public async Task<IResult> AddOrRestartNode(string name)
         {
             return await ManageNodeService.AddOrStartNode(name);
+        }
+        [HttpPost("StopNode")]
+        public async Task<IResult> StopNode(string name)
+        {
+            return await ManageNodeService.StopNode(name);
         }
         [HttpPost("RecalcNode")]
         public async Task<IResult> RecalcNode(string name, string startTimeLocal, string endTimeLocal)

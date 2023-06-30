@@ -79,7 +79,7 @@ public class QuartzHostedService : IHostedService
         foreach (var node in nodes)
         {
             CalcNodes.TryAdd(node.SearchAttribute, node);
-            await CalcServiceCollector.AddSchedulledCalcService(node);
+            await CalcServiceCollector.AddCalcService(node);
         }
         return nodes.ToArray();
     }
