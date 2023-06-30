@@ -20,10 +20,10 @@ namespace IFormula.Controllers
         {
             return await ManageNodeService.AddOrStartNode(name);
         }
-        [HttpPost("StopNode")]
-        public async Task<IResult> StopNode(string name)
+        [HttpPost("StopAndDeleteNode")]
+        public async Task<IResult> StopAndDeleteNode(string name)
         {
-            return await ManageNodeService.StopNode(name);
+            return await ManageNodeService.StopAndDeleteNode(name);
         }
         [HttpPost("RecalcNode")]
         public async Task<IResult> RecalcNode(string name, string startTimeLocal, string endTimeLocal)

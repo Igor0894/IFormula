@@ -32,7 +32,7 @@ namespace ApplicationServices.Services
             await StartJob(name);
             return Results.Ok();
         }
-        public async Task<IResult> StopNode(string name)
+        public async Task<IResult> StopAndDeleteNode(string name)
         {
             DeleteNodeFromFile(name);
             if (await TryDeleteJobs(name))
