@@ -7,8 +7,8 @@ using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Http;
 using Quartz.Impl.Matchers;
 using Quartz.Spi;
-using System.Threading;
-using System.Xml.Linq;
+using Newtonsoft.Json;
+using System.Text;
 
 namespace ApplicationServices.Services
 {
@@ -34,6 +34,7 @@ namespace ApplicationServices.Services
         }
         public async Task<IResult> StopNode(string name)
         {
+            DeleteNodeFromFile(name);
             if (await TryDeleteJobs(name))
             {
                 Logger.LogInformation($"Остановлен узел расчёта: {name}");
@@ -82,13 +83,13 @@ namespace ApplicationServices.Services
         private async Task StartRecalcNode(string name, DateTime start, DateTime end)
         {
             await recalcSemaphore.WaitAsync();
-            CalcService calcService = await GetCalcService(name);
+            CalcService calcService = await GetCalcServiceForRecalc(name);
             calcService.RecalcNode(start, end);
             recalcSemaphore.Release();
         }
         private async Task StartJob(string name)
         {
-            CalcNode node = await ReadNode(name);
+            CalcNode node = await ReadNodeAndAddCalcService(name);
             await scheduler.Start();
             JobForSchedule<SchedulledCalcsJob> job = new(node, "Nodes");
             try
@@ -109,49 +110,51 @@ namespace ApplicationServices.Services
                 throw new Exception($"Ошибка запуска узла {node.SearchAttribute} с режимом запуска по триггеру: {ex.Message}");
             }
         }
-        private async Task<CalcNode> ReadNode(string name)
+        private async Task<CalcNode> ReadNodeAndAddCalcService(string name)
         {
-            CalcNode[] Nodes;
+            CalcNode[] Nodes = GetNodesFromFile();
             CalcNode node = default!;
-            using (FileStream fs = new("Nodes.json", FileMode.OpenOrCreate))
+            if (!Nodes.Any(n => n.SearchAttribute == name))
             {
-                if (fs != null)
-                {
-                    Nodes = JsonSerializer.Deserialize<CalcNode[]>(fs)!;
-                    if (!Nodes.Any(n => n.SearchAttribute == name))
-                    {
-                        throw new Exception("Указанный узел расчёта отсутствует в конфигурационном файле");
-                    }
-                    node = Nodes.Where(n => n.SearchAttribute == name).FirstOrDefault()!;
-                }
-                else
-                {
-                    Logger.LogError($"В файле Nodes.json XML некорректного формата");
-                }
+                throw new Exception("Указанный узел расчёта отсутствует в конфигурационном файле");
             }
+            node = Nodes.Where(n => n.SearchAttribute == name).FirstOrDefault()!;
             await CalcServiceCollector.AddCalcService(node);
             return node;
         }
-        private async Task<CalcService> GetCalcService(string name)
+        private CalcNode[] GetNodesFromFile()
         {
-            CalcNode[] Nodes;
-            CalcNode node = default!;
+            CalcNode[] Nodes = new CalcNode[] { };
             using (FileStream fs = new("Nodes.json", FileMode.OpenOrCreate))
             {
                 if (fs != null)
                 {
-                    Nodes = JsonSerializer.Deserialize<CalcNode[]>(fs)!;
-                    if (!Nodes.Any(n => n.SearchAttribute == name))
-                    {
-                        throw new Exception("Указанный узел расчёта отсутствует в конфигурационном файле");
-                    }
-                    node = Nodes.Where(n => n.SearchAttribute == name).FirstOrDefault()!;
+                    Nodes = System.Text.Json.JsonSerializer.Deserialize<CalcNode[]>(fs)!;
                 }
                 else
                 {
                     Logger.LogError($"В файле Nodes.json XML некорректного формата");
                 }
             }
+            return Nodes;
+        }
+        private void DeleteNodeFromFile(string name)
+        {
+            CalcNode[] Nodes = GetNodesFromFile();
+            if (!Nodes.Any(n => n.SearchAttribute == name)) { return; }
+            Nodes = Nodes.Where(n => n.SearchAttribute != name).ToArray();
+            string json = JsonConvert.SerializeObject(Nodes, Formatting.Indented);
+            File.WriteAllText("Nodes.json", json, Encoding.UTF8);
+        }
+        private async Task<CalcService> GetCalcServiceForRecalc(string name)
+        {
+            CalcNode[] Nodes = GetNodesFromFile();
+            CalcNode node = default!;
+            if (!Nodes.Any(n => n.SearchAttribute == name))
+            {
+                throw new Exception("Указанный узел расчёта отсутствует в конфигурационном файле");
+            }
+            node = Nodes.Where(n => n.SearchAttribute == name).FirstOrDefault()!;
             CalcService calcService = await CalcServiceCollector.GetRecalcCalcService(node);
             return calcService;
         }
