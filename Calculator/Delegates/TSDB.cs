@@ -129,8 +129,7 @@ namespace Interpreter.Delegates
                 throw new Exception("Неверный формат даты");
             if (!DateTime.TryParse(endTime.ToString(), out DateTime et))
                 throw new Exception("Неверный формат даты");
-            double average = double.NaN;
-            average = Convert.ToDouble(TsdbClient.Summary(tagName, st, et, SummaryType.Average,
+            double average = Convert.ToDouble(TsdbClient.Summary(tagName, st, et, SummaryType.Average,
                     calculationBasis.ToLower() == "event" ? CalculationBasis.EventWeighted : CalculationBasis.TimeWeighted).Result.Value);
             return average;
         }

@@ -372,7 +372,7 @@ namespace TSDBWorkerAPI
             if (response.StatusCode == HttpStatusCode.OK)
             {
                 SummaryTotalResponse[] Resp = JsonConvert.DeserializeObject<SummaryTotalResponse[]>(response.Content);
-                TSDBValue V = new TSDBValue(tagName, Resp[0].endIntervalUTC, Resp[0].summaryDatа.total.ToString(), "", Quality.good);
+                TSDBValue V = GetSummaryTsdbValue(Resp[0], tagName, summaryType);
                 return V;
             }
             else
@@ -519,6 +519,32 @@ namespace TSDBWorkerAPI
             else
             {
                 return new TSDBValue(tagName, apiValue.timeStamp, apiValue.valueString, annotation, quality);
+            }
+        }
+        private TSDBValue GetSummaryTsdbValue(SummaryTotalResponse apiValue, string tagName, SummaryType summaryType)
+        {
+            switch (summaryType)
+            {
+                case SummaryType.Total:
+                    return new TSDBValue(tagName, apiValue.endIntervalUTC, apiValue.summaryDatа.total.ToString(), "", Quality.good);
+                case SummaryType.Average:
+                    return new TSDBValue(tagName, apiValue.endIntervalUTC, apiValue.summaryDatа.average.ToString(), "", Quality.good);
+                case SummaryType.Maximum:
+                    return new TSDBValue(tagName, apiValue.endIntervalUTC, apiValue.summaryDatа.doubleMax.ToString(), "", Quality.good);
+                case SummaryType.Minimum:
+                    return new TSDBValue(tagName, apiValue.endIntervalUTC, apiValue.summaryDatа.doubleMin.ToString(), "", Quality.good);
+                case SummaryType.Count:
+                    return new TSDBValue(tagName, apiValue.endIntervalUTC, apiValue.summaryDatа.count.ToString(), "", Quality.good);
+                case SummaryType.All:
+                    return new TSDBValue(tagName, apiValue.endIntervalUTC, apiValue.summaryDatа.total.ToString(), "", Quality.good);
+                case SummaryType.StandardDeviation:
+                    return new TSDBValue(tagName, apiValue.endIntervalUTC, apiValue.summaryDatа.standardDeviation.ToString(), "", Quality.good);
+                case SummaryType.Range:
+                    return new TSDBValue(tagName, apiValue.endIntervalUTC, apiValue.summaryDatа.doubleRange.ToString(), "", Quality.good);
+                case SummaryType.PercentGood:
+                    return new TSDBValue(tagName, apiValue.endIntervalUTC, apiValue.summaryDatа.percentGood.ToString(), "", Quality.good);
+                default:
+                    return null;
             }
         }
         private async Task<RestResponse> ExecuteRequest(RestRequest request, string body)

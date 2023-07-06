@@ -29,6 +29,13 @@
     public class Summarydatа
     {
         public float total { get; set; }
+        public float average { get; set; }
+        public float doubleMax { get; set; }
+        public float doubleMin { get; set; }
+        public float count { get; set; }
+        public float standardDeviation { get; set; }
+        public float doubleRange { get; set; }
+        public float percentGood { get; set; }
     }
 
     public enum SummaryType
