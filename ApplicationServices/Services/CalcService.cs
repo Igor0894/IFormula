@@ -15,7 +15,7 @@ namespace ApplicationServices.Services
 #nullable disable
     {
         private ILogger<CalcService> Logger { get; set; }
-        public string ConnectionString { get; set; }
+        public static string ConnectionString { get; set; }
         public CalcNode Node { get; set; }
         public bool SchedulledInitialized { get; set; }  = false;
         public bool TriggerInitialized { get; set; } = false;

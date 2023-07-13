@@ -18,8 +18,7 @@ namespace ApplicationServices.Calculator
         public Interpreter.Interpreter Interpreter = new();
         public SQL Sql = new()
         {
-            Address = "b3srv148040",
-            Database = "ISP"
+            ConnectionString = CalcService.ConnectionString
         };
         public BlockingCollection<CalcAttribute> Attributes = new();
         public BlockingCollection<CalcAttribute> TriggerAttributes = new();

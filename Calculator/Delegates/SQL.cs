@@ -9,11 +9,7 @@ namespace Interpreter.Delegates
         public bool SSPI { get; set; } = true;
         public string User { get; set; } = "sa";
         public string Password { get; set; } = "";
-        private string ConnectionString
-        {
-            get => SSPI ? $"Data Source={Address};Initial Catalog={Database};Integrated Security=True;" :
-                $"Data Source={Address};Initial Catalog={Database};User Id={User};Password={Password}";
-        }
+        public string ConnectionString { get; set; }
         public void UpdateSQLValue(Guid attributeId, string? value, DateTime timeStamp)
         {
             string query = @"IF EXISTS(SELECT * FROM TimedValue WHERE ElementAttributeId = @AttributeId AND Time = @TimeStamp)
