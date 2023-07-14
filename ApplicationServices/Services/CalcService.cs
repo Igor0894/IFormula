@@ -21,6 +21,20 @@ namespace ApplicationServices.Services
         public bool TriggerInitialized { get; set; } = false;
         private SchedulledCalcsHandler schedulledCalcsHandler;
         private TriggerCalcsHandler triggerCalcsHandler;
+        public bool HaveSchedulledElements 
+        { 
+            get
+            {
+                return schedulledCalcsHandler.CalcElements.Count > 0;
+            }
+        }
+        public bool HaveTriggerElements
+        {
+            get
+            {
+                return triggerCalcsHandler.CalcElements.Count > 0;
+            }
+        }
         public CalcService(ILogger<CalcService> calcServiceLogger, ILogger<CalcsHandler> calcHandlerLogger, string connectionString, CalcNode calcNode, TsdbClient tsdbWorker)
         {
             try
@@ -78,14 +92,11 @@ namespace ApplicationServices.Services
         }
         public async Task RunSchedulledCalcs(DateTime ts)
         {
-            if (schedulledCalcsHandler.CalcElements.Count > 0)
-            {
-                await schedulledCalcsHandler.CalculateSchedulledElements(ts, CalcMode.Schedulled);
-            }
+            await schedulledCalcsHandler.CalculateSchedulledElements(ts, CalcMode.Schedulled);
         }
         public async Task RunCheckSubscribeDataAbdRunCalcs(ILogger<TriggerCalcsJob> logger)
         {
-            if(triggerCalcsHandler.CalcElements.Count > 0)
+            if(HaveTriggerElements)
             {
                 await triggerCalcsHandler.RunSubscriptionDataGet(logger, CalcMode.Trigger);
             }
@@ -100,7 +111,7 @@ namespace ApplicationServices.Services
         }
         private async Task RecalcSchedulle(DateTime startTime, DateTime endTime)
         {
-            if(schedulledCalcsHandler.CalcElements.Count == 0) { return; }
+            if(!HaveSchedulledElements) { return; }
             var crontabOptions = new CrontabSchedule.ParseOptions();
             crontabOptions.IncludingSeconds = true;
             var schedule = CrontabSchedule.Parse(Node.cronExpression.Replace("?", "*"), crontabOptions);

@@ -27,10 +27,15 @@ namespace ApplicationServices.Scheduller.Jobs
             {
                 logger.LogError($"SchedulledCalcsJob по задаче {name} остановлен потому что узел расчёта не инициализирован");
                 await context.Scheduler.PauseJob(context.JobDetail.Key);
+                return;
             }
             DateTime ts = context.FireTimeUtc.DateTime.ToLocalTime();
-            logger.LogDebug($"Запущена задача: {name} с меткой времени {ts}");
-            await calcService.RunSchedulledCalcs(ts);
+            if (calcService.HaveSchedulledElements) { await RunCalc(name, ts, calcService); }
+        }
+        public async Task RunCalc(string name, DateTime startTs, CalcService calcService)
+        {
+            logger.LogDebug($"Запущена задача: {name} с меткой времени {startTs}");
+            await calcService.RunSchedulledCalcs(startTs);
         }
     }
 }
