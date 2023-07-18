@@ -25,9 +25,11 @@ namespace ApplicationServices.Scheduller.Jobs
             CalcService calcService = CalcServiceCollector.GetSchedulledAndTriggeredCalcService(name);
             if (!calcService.SchedulledInitialized)
             {
-                logger.LogError($"SchedulledCalcsJob по задаче {name} остановлен потому что узел расчёта не инициализирован");
+                /*logger.LogError($"SchedulledCalcsJob по задаче {name} остановлен потому что узел расчёта не инициализирован");
                 await context.Scheduler.PauseJob(context.JobDetail.Key);
-                return;
+                return;*/
+                logger.LogError($"SchedulledCalcsJob по задаче {name} не выполняется потому что узел расчёта не инициализирован. Попытка инициализации..");
+                await calcService.InitializeModel(CalcMode.Schedulled);
             }
             DateTime ts = context.FireTimeUtc.DateTime.ToLocalTime();
             if (calcService.HaveSchedulledElements) { await RunCalc(name, ts, calcService); }

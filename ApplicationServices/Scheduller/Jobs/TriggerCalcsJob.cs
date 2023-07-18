@@ -25,8 +25,9 @@ namespace ApplicationServices.Scheduller.Jobs
             CalcService calcService = CalcServiceCollector.GetSchedulledAndTriggeredCalcService(name);
             if (!calcService.TriggerInitialized)
             {
-                logger.LogError($"SchedulledCalcsJob по задаче {name} остановлен потому что узел расчёта не инициализирован");
-                await context.Scheduler.PauseJob(context.JobDetail.Key);
+                logger.LogError($"TriggerCalcsJob по задаче {name} пропущен потому что узел расчёта не инициализирован");
+                //await context.Scheduler.PauseJob(context.JobDetail.Key);
+                return;
             }
             /*DateTime ts = context.FireTimeUtc.DateTime.ToLocalTime();
             logger.LogDebug($"Проверки новых значений триггеров узла расчётов: {name}");*/
