@@ -201,6 +201,9 @@ namespace ApplicationServices.Calculator
                         case Value_Type.SET:
                             WriteValuesToDictionary<long>(tag, valuesLong, log);
                             break;
+                        case Value_Type.LONG:
+                            WriteValuesToDictionary<long>(tag, valuesLong, log);
+                            break;
                         case Value_Type.FLOAT:
                             WriteValuesToDictionary<float>(tag, valuesFloat, log);
                             break;
