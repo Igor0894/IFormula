@@ -31,6 +31,7 @@ namespace ApplicationServices.Calculator
         List<string> subscriptionTags;
         private Dictionary<string, Value_Type> triggersTypes;
         private DateTime lastSubscriptionDataLoad;
+        private static int MaxCountPointsInBufferForTag = 200;
         public TriggerCalcsHandler(ILogger<CalcsHandler> logger, ILogger<CalcService> calcServiceLogger) : base(logger, calcServiceLogger)
         {
             CalcServiceLogger = calcServiceLogger;
@@ -84,7 +85,7 @@ namespace ApplicationServices.Calculator
         }
         private async Task GetSubscriptionGuid()
         {
-            SubscriptionGuid = await TSDB.TsdbClient.GetFirstSubscriptionGuid(subscriptionTags.ToArray(), TimeToLiveSubscription, subscriptionTags.Count * 100);
+            SubscriptionGuid = await TSDB.TsdbClient.GetFirstSubscriptionGuid(subscriptionTags.ToArray(), TimeToLiveSubscription, subscriptionTags.Count * MaxCountPointsInBufferForTag);
             lastSubscribeUpdate = DateTime.Now;
             CalcServiceLogger.LogInformation($"Узел расчёта по триггеру: {Node.SearchAttribute}. Получен Guid подписки {SubscriptionGuid} для {subscriptionTags.Count} тегов подписки.\r\n");
         }
