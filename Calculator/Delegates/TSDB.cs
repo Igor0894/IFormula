@@ -168,9 +168,9 @@ namespace Interpreter.Delegates
         }
         private static Value_Type GetValueType(string tagName)
         {
-            if (!InputTagsTypes.ContainsKey(tagName)) 
+            lock (InputTagsTypesMutex)
             {
-                lock (InputTagsTypesMutex)
+                if (!InputTagsTypes.ContainsKey(tagName))
                 {
                     string typeString = TsdbClient.GetMetaAttribute(tagName, "Value_Type").Result;
                     Value_Type type = (Value_Type)Enum.Parse(typeof(Value_Type), typeString);
@@ -178,10 +178,7 @@ namespace Interpreter.Delegates
                     return type;
                 }
             }
-            else
-            {
-                return InputTagsTypes[tagName];
-            }
+            return InputTagsTypes[tagName];
         }
         private static Dictionary<string, List<TSDBValue>> GetTSDBValues(string tagName, DateTime ts, string method)
         {

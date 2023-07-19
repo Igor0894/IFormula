@@ -115,19 +115,22 @@ namespace ApplicationServices.Calculator
         {
             Prepair(calcMode);
             await CheckSubscription();
+            int totalCalculatedElements = 0;
             try
             {
                 ValuesForWrite = new ConcurrentDictionary<string, List<TSDBSimpleValue>> { };
-                var subscriptionDatas = await TSDB.TsdbClient.GetSubscriptionData(SubscriptionGuid, subscriptionTags.Count * 10);
+                var subscriptionDatas = await TSDB.TsdbClient.GetSubscriptionData(SubscriptionGuid, subscriptionTags.Count * MaxCountPointsInBufferForTag);
                 lastSubscriptionDataLoad = DateTime.Now;
-                if (subscriptionDatas.Count > 0 && subscriptionDatas.Values.FirstOrDefault().Count == 0) { return; }
+                if (subscriptionDatas.Count == 0) { return; }
                 Parallel.ForEach(subscriptionDatas, data =>
                 {
+                    if (data.Value.Count == 0) { return; }  
                     foreach (var element in CalcElements)
                     {
                         if (element.TriggerAttributes.Any(a => a.OutDataSource.Name == data.Key))
                         {
                             CalculateTriggeredElements(element, data.Value, logger);
+                            totalCalculatedElements++;
                         }
                     }
                 });
@@ -139,8 +142,11 @@ namespace ApplicationServices.Calculator
                 }
                 timer.Stop();
                 TimeSpan time = timer.Elapsed;
-                log.AppendFormat("Расчет успешно завершен: время выполнения {0}", time.ToString(@"m\:ss\.fff"));
-                SendLog(log.ToString(), false);
+                if (totalCalculatedElements > 0) 
+                { 
+                    log.AppendFormat("Расчет успешно завершен: время выполнения {0}", time.ToString(@"m\:ss\.fff")); 
+                    SendLog(log.ToString(), false); 
+                }
             }
             catch (Exception e)
             {

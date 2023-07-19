@@ -296,8 +296,9 @@ namespace ApplicationServices.Calculator
             ValuesForWrite = new ConcurrentDictionary<string, List<TSDBSimpleValue>> { };
             calcLog = new();
             timer = new();
-            log.Clear();
             timer.Start();
+            log.Clear();
+            
         }
     }
 }
