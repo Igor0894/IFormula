@@ -191,7 +191,21 @@ namespace ApplicationServices.Calculator
                 try
                 {
                     string tag = KeyValuePair.Key;
-                    if (!OutputTagsTypes.ContainsKey(tag)) { log.AppendFormat($"Отсутствует тег {tag}\r\n"); return; }
+                    if (!OutputTagsTypes.ContainsKey(tag)) 
+                    { 
+                        log.AppendFormat($"Не загружен тип тега [{tag}]. Повторим попытку..\r\n");
+                        try
+                        {
+                            string typeString = TSDB.TsdbClient.GetMetaAttribute(tag, "Value_Type").Result;
+                            Value_Type type = (Value_Type)Enum.Parse(typeof(Value_Type), typeString);
+                            OutputTagsTypes.Add(tag, type);
+                        }
+                        catch (Exception ex)
+                        {
+                            CalcServiceLogger.LogError($"Ошибка при получении типа тега {tag}: {ex.Message}");
+                            return;
+                        }
+                    }
                     Value_Type tagType = OutputTagsTypes[tag];
                     switch (tagType)
                     {
@@ -264,15 +278,21 @@ namespace ApplicationServices.Calculator
                 {
                     if (typeof(T) == typeof(double) && !double.TryParse(value.Value.ToString(), out double resultDouble))
                     {
-                        throw new Exception($"Неверный тип данных значения для double: {value.Value}");
+                        value.Value = resultDouble;
+                        value.Quality = Quality.bad;
+                        //throw new Exception($"Неверный тип данных значения для double: {value.Value}");
                     }
                     if (typeof(T) == typeof(long) && !long.TryParse(value.Value.ToString(), out long resultLong))
                     {
-                        throw new Exception($"Неверный тип данных значения для long (SET): {value.Value}");
+                        value.Value = resultLong;
+                        value.Quality = Quality.bad;
+                        //throw new Exception($"Неверный тип данных значения для long (SET): {value.Value}");
                     }
                     if (typeof(T) == typeof(float) && !float.TryParse(value.Value.ToString(), out float resultFloat))
                     {
-                        throw new Exception($"Неверный тип данных значения для float: {value.Value}");
+                        value.Value = resultFloat;
+                        value.Quality = Quality.bad;
+                        //throw new Exception($"Неверный тип данных значения для float: {value.Value}");
                     }
                     valuesDict[tagName].Add(value);
                 }
