@@ -6,20 +6,21 @@
         {
             if (!DateTime.TryParse(dateTime.ToString(), out DateTime timeStamp))
                 throw new Exception("Неверный формат даты");
-            return offset == 0 ? timeStamp.Date : timeStamp.AddMinutes(-(offset + 1)).Date.AddMinutes(offset);
+            //return offset == 0 ? timeStamp.Date : timeStamp.AddMinutes(-(offset + 1)).Date.AddMinutes(offset);
+            return offset == 0 ? timeStamp.Date : timeStamp.Date.AddMinutes(offset);
         }
         public static DateTime Bom(object dateTime, double offset = 0)
         {
             if (!DateTime.TryParse(dateTime.ToString(), out DateTime timeStamp))
                 throw new Exception("Неверный формат даты");
-            if (offset != 0) timeStamp = timeStamp.AddMinutes(-(offset + 1));
+            //if (offset != 0) timeStamp = timeStamp.AddMinutes(-(offset + 1));
             return new DateTime(timeStamp.Year, timeStamp.Month, 1).AddMinutes(offset);
         }
         public static DateTime Boy(object dateTime, double offset = 0)
         {
             if (!DateTime.TryParse(dateTime.ToString(), out DateTime timeStamp))
                 throw new Exception("Неверный формат даты");
-            if (offset != 0) timeStamp = timeStamp.AddMinutes(-(offset + 1));
+            //if (offset != 0) timeStamp = timeStamp.AddMinutes(-(offset + 1));
             return new DateTime(timeStamp.Year, 1, 1).AddMinutes(offset);
         }
         public static int DaysInMonth(int year, int month)
