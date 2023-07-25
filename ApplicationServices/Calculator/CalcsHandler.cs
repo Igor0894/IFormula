@@ -122,6 +122,7 @@ namespace ApplicationServices.Calculator
             try
             {
                 attribute.Value = element.Interpreter.Eval(attribute.Expression.ToLower());
+                //attribute.Value = element.Interpreter.Eval(attribute.Expression);
                 string log = "[Очередь №" + attribute.Order + "] Атрибут: " + attribute.Name + " | Функция: " + attribute.Expression + " | Результат: " + attribute.Value;
                 DateTime ts;
                 if (attribute.Value.ToString() == (double.MinValue + 1).ToString()) state.Break(); //Exit
