@@ -112,6 +112,10 @@ namespace Interpreter.Delegates
             TSDBValue tsdbValue = GetTSDBValues(tagName, ts, method).Values.FirstOrDefault()[0];
             return tsdbValue.Quality != Quality.good;
         }
+        public static bool BadVal(TSDBResult value)
+        {
+            return !value.Good;
+        }
         public static double TagTot(string tagName, object startTime, object endTime, string calculationBasis = "time", int factor = 24)
         {
             if (!DateTime.TryParse(startTime.ToString(), out DateTime st))

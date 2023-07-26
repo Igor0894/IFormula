@@ -32,12 +32,24 @@ namespace ApplicationServices.Services
             await StartJob(name);
             return Results.Ok();
         }
+        public async Task<IResult> StopNode(string name)
+        {
+            if (await TryDeleteJobs(name))
+            {
+                Logger.LogInformation($"Остановлен узел расчёта: {name}");
+            }
+            else
+            {
+                throw new Exception($"Указанный узел расчёта не запущен: {name}");
+            }
+            return Results.Ok();
+        }
         public async Task<IResult> StopAndDeleteNode(string name)
         {
             DeleteNodeFromFile(name);
             if (await TryDeleteJobs(name))
             {
-                Logger.LogInformation($"Остановлен узел расчёта: {name}");
+                Logger.LogInformation($"Остановлен и удалён узел расчёта: {name}");
             }
             else
             {

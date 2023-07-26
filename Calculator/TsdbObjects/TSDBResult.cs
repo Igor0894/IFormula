@@ -6,5 +6,9 @@
         public DateTime Time { get; set; } = DateTime.MinValue;
         public string Digital { get; set; } = "NoData";
         public bool Good { get; set; } = false;
+        public override string ToString()
+        {
+            return Value.ToString();
+        }
     }
 }
