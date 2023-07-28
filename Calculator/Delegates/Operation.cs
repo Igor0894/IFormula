@@ -14,7 +14,7 @@
         }
         public static bool Compare(object str1, object str2)
         {
-            if (string.Compare(str1.ToString(), str2.ToString()) == 0) return true;
+            if (string.Compare(str1.ToString().ToLower(), str2.ToString().ToLower()) == 0) return true;
             else return false;
         }
     }
