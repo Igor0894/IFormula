@@ -234,12 +234,12 @@ namespace Interpreter.Delegates
                     results = TsdbClient.GetTakeFrameByTag<string>(tagName, st, et).Result;
                     break;
             }
-            Dictionary<string, List<TSDBValue>> firstTdbValuesDict = GetTSDBValues(tagName, et, "ExactOrPrev");
+            Dictionary<string, List<TSDBValue>> firstTdbValuesDict = GetTSDBValues(tagName, st, "ExactOrPrev");
             TSDBValue lastTsdbValue = firstTdbValuesDict.Values.FirstOrDefault()[0];
-            if (results.Count == 0)
+            if (results is null || results.Count == 0)
             {
                 //Trigger
-                if (lastTsdbValue.Value == value)
+                if (lastTsdbValue.Value.ToString() == value.ToString())
                 {
                     return (et - st).TotalSeconds;
                 }
@@ -249,11 +249,11 @@ namespace Interpreter.Delegates
             foreach (var tsdbValue in results)
             {
                 //Trigger
-                if (lastTsdbValue.Value == value) { totalSeconds += (tsdbValue.Timestamp - lastTsdbValue.Timestamp).TotalSeconds; }
+                if (lastTsdbValue.Value.ToString() == value.ToString()) { totalSeconds += (tsdbValue.Timestamp - lastTsdbValue.Timestamp).TotalSeconds; }
                 lastTsdbValue = tsdbValue;
             }
             //Trigger
-            if (lastTsdbValue.Value == value)
+            if (lastTsdbValue.Value.ToString() == value.ToString())
             {
                 totalSeconds += (et - lastTsdbValue.Timestamp).TotalSeconds;
             }
