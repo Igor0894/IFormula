@@ -8,9 +8,9 @@ namespace Interpreter
     {
         public List<Function> Added = new List<Function>();
         public List<Function> Unadded = new List<Function>();
-        private readonly Type[] types = new[] { typeof(Math), typeof(TSDB), typeof(Date), typeof(Operation), typeof(string) };
+        private readonly Type[] types = new[] { typeof(Math), typeof(TSDB), typeof(Date), typeof(Operation), typeof(string), typeof(Math) };
         private readonly string[] unusedMethods = new[] { "Ceiling", "DivRem", "BigMul", "IEEERemainder",
-            "Floor", "Compare", "CompareOrdinal", "Copy", "Intern", "IsInterned", "Clone", "op_Equality",  "op_Inequality"};
+            "CompareOrdinal", "Copy", "Intern", "IsInterned", "Clone", "op_Equality",  "op_Inequality"};
         private readonly string[] unusedDefenition = new[] { "" };
         public Functions(ref DynamicExpresso.Interpreter interpreter)
         {
@@ -22,6 +22,7 @@ namespace Interpreter
                     string name = arrayMethodInfo[i].Name;
                     string definition = MethodDefinition(arrayMethodInfo[i]);
                     if (unusedMethods.Contains(name) || unusedDefenition.Contains(definition)) continue;
+                    if(type == typeof(string) && name == "Compare") { continue; }
                     try
                     {
                         interpreter.SetFunction(name, CreateDelegate(arrayMethodInfo[i]));

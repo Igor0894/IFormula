@@ -1,6 +1,6 @@
 [
   {
-    "SearchAttribute": "CENG.Формула",
+    "SearchAttribute": "testFormula",
     "SearchModel": "*",
     "SearchTemplate": "*",
     "cronExpression": "0 0/1 * ? * *"

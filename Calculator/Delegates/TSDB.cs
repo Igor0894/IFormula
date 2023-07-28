@@ -211,34 +211,56 @@ namespace Interpreter.Delegates
 
 #warning Требуется переписать методы
         //Первое значение равное Value
-        /*public static TSDBResult FindEQ(string tagName, object startTime, object endTime, object value)
+        public static TSDBResult FindEQ(string tagName, object startTime, object endTime, object value)
         {
-            TSDBPoint pt = TSDB.GetTagByName(tagName);
             TSDBResult tsdbesult = new TSDBResult();
-            bool isDouble = double.TryParse(value.ToString(), out _);
+            bool isDouble = double.TryParse(value.ToString(), out double findValue);
             if (!DateTime.TryParse(startTime.ToString(), out DateTime st))
                 throw new Exception("Неверный формат даты");
             if (!DateTime.TryParse(endTime.ToString(), out DateTime et))
                 throw new Exception("Неверный формат даты");
-            int count = Convert.ToInt32(pt.Data.Summary(st, et, TSDBSummaryType.Count, TSDBSummaryCalculationBasis.EventWeighted).Value);
+            int count = Convert.ToInt32(TsdbClient.Summary(tagName, st, et, SummaryType.Count, CalculationBasis.EventWeighted).Result.Value);
             if (count > 0)
             {
-                TSDBValue result = pt.Data.RecordedValues(new DateTime(st.Ticks, DateTimeKind.Local), new DateTime(et.Ticks, DateTimeKind.Local), BoundaryTypeConstants.btInside)
+                Value_Type tagType = GetValueType(tagName);
+                Task <List<TSDBValue>> results;
+                switch (tagType)
+                {
+                    case Value_Type.DOUBLE:
+                        results = TsdbClient.GetTakeFrameByTag<double>(tagName, new DateTime(st.Ticks, DateTimeKind.Local), new DateTime(et.Ticks, DateTimeKind.Local));
+                        break;
+                    case Value_Type.LONG:
+                        results = TsdbClient.GetTakeFrameByTag<long>(tagName, new DateTime(st.Ticks, DateTimeKind.Local), new DateTime(et.Ticks, DateTimeKind.Local));
+                        break;
+                    case Value_Type.SET:
+                        results = TsdbClient.GetTakeFrameByTag<long>(tagName, new DateTime(st.Ticks, DateTimeKind.Local), new DateTime(et.Ticks, DateTimeKind.Local));
+                        break;
+                    case Value_Type.FLOAT:
+                        results = TsdbClient.GetTakeFrameByTag<float>(tagName, new DateTime(st.Ticks, DateTimeKind.Local), new DateTime(et.Ticks, DateTimeKind.Local));
+                        break;
+                    default:
+                        results = TsdbClient.GetTakeFrameByTag<string>(tagName, new DateTime(st.Ticks, DateTimeKind.Local), new DateTime(et.Ticks, DateTimeKind.Local));
+                        break;
+                }
+                TSDBValue result = results.Result
                     .Where(item =>
                     {
                         if (isDouble)
-                            if (double.TryParse(item.Value.ToString(), out double val)) return val >= Double.Parse(value.ToString());
+                            if (double.TryParse(item.Value.ToString(), out double val)) return val >= double.Parse(value.ToString());
                         return value.ToString() == item.Value.ToString();
-                    }).DefaultIfEmpty(new TSDBValue(pt.Name, DateTime.MinValue, "NoData", String.Empty, Quality.bad)).First();
-                tsdbesult.Value = result.Value;
-                tsdbesult.Digital = pt.ValueType == TSDBValueType.SET ? result.DigitalSetValue : result.Value.ToString();
-                tsdbesult.Time = result.TimestampUTC.ToLocalTime();
-                tsdbesult.Good = result.IsGood();
+                    }).DefaultIfEmpty(new TSDBValue(tagName, DateTime.MinValue, "NoData", string.Empty, Quality.bad)).First();
+                tsdbesult = new TSDBResult()
+                {
+                    Value = result.Value,
+                    Time = result.TimestampUTC.ToLocalTime(),
+                    Digital = tagType == Value_Type.SET ? result.DigitalSetValue : result.Value.ToString(),
+                    Good = result.IsGood()
+                };
             }
             return tsdbesult;
         }
         //Первое значение равное или больше Value
-        public static TSDBResult FindGE(string tagName, object startTime, object endTime, double value)
+        /*public static TSDBResult FindGE(string tagName, object startTime, object endTime, double value)
         {
             TSDBPoint pt = TSDB.GetTagByName(tagName);
             TSDBResult tsdbesult = new TSDBResult();

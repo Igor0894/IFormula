@@ -8,5 +8,14 @@
                 return trueCondition;
             return falseCondition;
         }
+        public static int Floor(object input)
+        {
+            return Convert.ToInt32(Math.Round(decimal.Parse(input.ToString())));
+        }
+        public static bool Compare(object str1, object str2)
+        {
+            if (string.Compare(str1.ToString(), str2.ToString()) == 0) return true;
+            else return false;
+        }
     }
 }

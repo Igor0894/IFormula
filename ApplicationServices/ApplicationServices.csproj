@@ -16,7 +16,7 @@
     <PackageReference Include="CronExpressionDescriptor" Version="2.19.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="7.0.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="7.0.0" />
-    <PackageReference Include="ncrontab" Version="3.3.1" />
+    <PackageReference Include="NCrontab" Version="3.3.1" />
     <PackageReference Include="NLog.Web.AspNetCore" Version="5.3.0" />
     <PackageReference Include="Quartz.AspNetCore" Version="3.6.2" />
   </ItemGroup>
