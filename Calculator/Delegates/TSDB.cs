@@ -259,6 +259,57 @@ namespace Interpreter.Delegates
             }
             return totalSeconds;
         }
+        public static double TimeGE(string tagName, object startTime, object endTime, object value)
+        {
+            if (!DateTime.TryParse(startTime.ToString(), out DateTime st))
+                throw new Exception("Неверный формат даты");
+            if (!DateTime.TryParse(endTime.ToString(), out DateTime et))
+                throw new Exception("Неверный формат даты");
+            Value_Type tagType = GetValueType(tagName);
+            List<TSDBValue> results;
+            switch (tagType)
+            {
+                case Value_Type.DOUBLE:
+                    results = TsdbClient.GetTakeFrameByTag<double>(tagName, st, et).Result;
+                    break;
+                case Value_Type.LONG:
+                    results = TsdbClient.GetTakeFrameByTag<long>(tagName, st, et).Result;
+                    break;
+                case Value_Type.SET:
+                    results = TsdbClient.GetTakeFrameByTag<long>(tagName, st, et).Result;
+                    break;
+                case Value_Type.FLOAT:
+                    results = TsdbClient.GetTakeFrameByTag<float>(tagName, st, et).Result;
+                    break;
+                default:
+                    results = TsdbClient.GetTakeFrameByTag<string>(tagName, st, et).Result;
+                    break;
+            }
+            Dictionary<string, List<TSDBValue>> firstTdbValuesDict = GetTSDBValues(tagName, st, "ExactOrPrev");
+            TSDBValue lastTsdbValue = firstTdbValuesDict.Values.FirstOrDefault()[0];
+            if (results is null || results.Count == 0)
+            {
+                //Trigger
+                if (Convert.ToDouble(lastTsdbValue.Value) >= Convert.ToDouble(value))
+                {
+                    return (et - st).TotalSeconds;
+                }
+                else { return 0; }
+            }
+            double totalSeconds = 0;
+            foreach (var tsdbValue in results)
+            {
+                //Trigger
+                if (Convert.ToDouble(lastTsdbValue.Value) >= Convert.ToDouble(value)) { totalSeconds += (tsdbValue.Timestamp - lastTsdbValue.Timestamp).TotalSeconds; }
+                lastTsdbValue = tsdbValue;
+            }
+            //Trigger
+            if (Convert.ToDouble(lastTsdbValue.Value) >= Convert.ToDouble(value))
+            {
+                totalSeconds += (et - lastTsdbValue.Timestamp).TotalSeconds;
+            }
+            return totalSeconds;
+        }
 #warning Требуется переписать методы
         //Первое значение равное Value
         /*public static TSDBResult FindEQ(string tagName, object startTime, object endTime, object value)
