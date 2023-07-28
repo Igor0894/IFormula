@@ -100,5 +100,11 @@
                 throw new Exception("Неверный формат даты");
             return timeStamp.Second;
         }
+        public static double DaySec(object dateTime)
+        {
+            if (!DateTime.TryParse(dateTime.ToString(), out DateTime timeStamp))
+                throw new Exception("Неверный формат даты");
+            return (timeStamp - timeStamp.Date).TotalSeconds;
+        }
     }
 }
