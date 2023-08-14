@@ -122,7 +122,19 @@ namespace ApplicationServices.Calculator
                 var subscriptionDatas = await TSDB.TsdbClient.GetSubscriptionData(SubscriptionGuid, subscriptionTags.Count * MaxCountPointsInBufferForTag);
                 lastSubscriptionDataLoad = DateTime.Now;
                 if (subscriptionDatas.Count == 0) { return; }
-                Parallel.ForEach(subscriptionDatas, data =>
+                Parallel.ForEach(CalcElements, element =>
+                {
+                    foreach (var data in subscriptionDatas)
+                    {
+                        if (data.Value.Count == 0) { continue; }
+                        if (element.TriggerAttributes.Any(a => a.OutDataSource.Name == data.Key))
+                        {
+                            CalculateTriggeredElements(element, data.Value, logger);
+                            totalCalculatedElements++;
+                        }
+                    }
+                });
+                /*Parallel.ForEach(subscriptionDatas, data =>
                 {
                     if (data.Value.Count == 0) { return; }  
                     foreach (var element in CalcElements)
@@ -133,7 +145,7 @@ namespace ApplicationServices.Calculator
                             totalCalculatedElements++;
                         }
                     }
-                });
+                });*/
                 log.Append(string.Join("", calcLog));
                 if (ValuesForWrite.Count > 0)
                 {
@@ -172,10 +184,17 @@ namespace ApplicationServices.Calculator
             {
                 triggersTypes = await GetTagsTypesForTriggerTags(subscriptionTags);
                 CalcServiceLogger.LogInformation($"Считаны типы данных для {triggersTypes.Count} триггерных тегов");
-                await Parallel.ForEachAsync(subscriptionTags, async (tag, token) =>
+                await Parallel.ForEachAsync(CalcElements, async (element, token) =>
+                {
+                    foreach (CalcAttribute triggerAttribute in element.TriggerAttributes)
+                    {
+                        await TakeTriggersValuesAndRunCalcsForTag(startTime, endTime, triggerAttribute.OutDataSource.Name);
+                    }
+                });
+                /*await Parallel.ForEachAsync(subscriptionTags, async (tag, token) =>
                 {
                     await TakeTriggersValuesAndRunCalcsForTag(startTime, endTime, tag);
-                });
+                });*/
                 log.Append(string.Join("", calcLog));
                 if (ValuesForWrite.Count > 0)
                 {
