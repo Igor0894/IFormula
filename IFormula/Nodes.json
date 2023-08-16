@@ -1,6 +1,6 @@
 [
   {
-    "SearchAttribute": "testFormula",
+    "SearchAttribute": "CENG.Формула АММ-1",
     "SearchModel": "*",
     "SearchTemplate": "*",
     "cronExpression": "0 0/1 * ? * *"

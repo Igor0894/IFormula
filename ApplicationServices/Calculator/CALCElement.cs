@@ -5,6 +5,8 @@ using Attribute = ISP.SDK.IspObjects.Attribute;
 using Microsoft.Extensions.Logging;
 using System.Collections.Concurrent;
 using System.Configuration;
+using System.Text.RegularExpressions;
+using System.Linq;
 
 namespace ApplicationServices.Calculator
 {
@@ -118,7 +120,11 @@ namespace ApplicationServices.Calculator
                     for (int j = 0; j < Attributes.Count; j++)
                     {
                         changed = MapCalcAttributeAndChangeOrder(i, j);
-                        if (changed) { sorted = false; break; }
+                        if (changed) 
+                        { 
+                            sorted = false; 
+                            break; 
+                        }
                     }
                     if (changed) { break; }
                 }
@@ -158,12 +164,17 @@ namespace ApplicationServices.Calculator
                     itemI.OutDataSource.Time = itemI.OutDataSource.Time.Replace(path, itemJ.Variable);
                 }
             }
-            if (itemI.Expression.Contains(itemJ.Variable))
+            Regex varRegex = new Regex(@"_var\d+");
+            foreach(Match match in varRegex.Matches(itemI.Expression))
             {
-                if (!(itemI.Order > itemJ.Order))
+                if (match.Value == itemJ.Variable)
                 {
-                    itemI.Order = itemJ.Order + 1;
-                    changed = true;
+                    if (!(itemI.Order > itemJ.Order))
+                    {
+                        itemI.Order = itemJ.Order + 1;
+                        changed = true;
+                        break;
+                    }
                 }
             }
             return changed;
