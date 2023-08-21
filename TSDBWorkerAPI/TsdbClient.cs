@@ -500,6 +500,37 @@ namespace TSDBWorkerAPI
             client?.Dispose();
             GC.SuppressFinalize(this);
         }
+        public async Task<TSDBValue> GetSnapshotByTag<T>(string Tag)
+        {
+            RestRequest request = new RestRequest(_TSDBServerURI + "/Snapshot/GetSnapshotByTag", Method.Post);
+            var body = "{ \"tagName\":\"" + Tag + "\" }";
+            RestResponse response = await ExecuteRequest(request, body);
+            if (response.StatusCode == HttpStatusCode.OK)
+            {
+                SnapshotResponse SnapInfo = JsonConvert.DeserializeObject<SnapshotResponse>(response.Content);
+                TSDBValue V = GetTsdbValue<T>(SnapInfo.dataPoint, SnapInfo.tagName);
+                return V;
+            }
+            else
+            {
+                throw new Exception($"При попытке получения Snapshot для тега [{Tag}] возникла проблема!\nСтатус: {response.StatusCode.ToString()}");
+            }
+        }
+        public async Task<TagInfoResponse> GetTagInfo(string Tag)
+        {
+            RestRequest request = new RestRequest(_TSDBServerURI + "/Tag/GetTag", Method.Post);
+            var body = "{ \"tagName\":\"" + Tag + "\" }";
+            RestResponse response = await ExecuteRequest(request, body);
+            if (response.StatusCode == HttpStatusCode.OK)
+            {
+                TagInfoResponse TagInfo = JsonConvert.DeserializeObject<TagInfoResponse>(response.Content);
+                return TagInfo;
+            }
+            else
+            {
+                throw new Exception($"При попытке получения информацию о теге [{Tag}] возникла проблема!\nСтатус: {response.StatusCode}");
+            }
+        }
         private TSDBValue GetTsdbValue<T>(Datapoint apiValue, string tagName)
         {
             string annotation = apiValue.annotation is null ? "" : apiValue.annotation;
