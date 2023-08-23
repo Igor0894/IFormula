@@ -159,14 +159,14 @@ namespace Interpreter.Delegates
                     calculationBasis.ToLower() == "event" ? CalculationBasis.EventWeighted : CalculationBasis.TimeWeighted).Result.Value);
             return total;
         }
-        public static double TagCount(string tagName, object startTime, object endTime, string calculationBasis = "event")
+        public static int TagCount(string tagName, object startTime, object endTime, string calculationBasis = "event")
         {
             if (!DateTime.TryParse(startTime.ToString(), out DateTime st))
                 throw new Exception("Неверный формат даты");
             if (!DateTime.TryParse(endTime.ToString(), out DateTime et))
                 throw new Exception("Неверный формат даты");
-            double total = 0;
-            total = Convert.ToDouble(TsdbClient.Summary(tagName, st, et, SummaryType.Count,
+            int total = 0;
+            total = Convert.ToInt32(TsdbClient.Summary(tagName, st, et, SummaryType.Count,
                     calculationBasis.ToLower() == "event" ? CalculationBasis.EventWeighted : CalculationBasis.TimeWeighted).Result.Value);
             return total;
         }

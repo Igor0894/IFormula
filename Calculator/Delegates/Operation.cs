@@ -17,7 +17,7 @@
             if (string.Compare(str1.ToString().ToLower(), str2.ToString().ToLower()) == 0) return true;
             else return false;
         }
-        public static object Left(object input, int len) 
+        public static string Left(object input, int len) 
         {
             string output = input.ToString().Substring(0, len);
             return output;

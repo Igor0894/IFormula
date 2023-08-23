@@ -6,9 +6,10 @@ namespace Interpreter
 {
     public class Functions
     {
+        double tgt = Convert.ToDouble(0);
         public List<Function> Added = new List<Function>();
         public List<Function> Unadded = new List<Function>();
-        private readonly Type[] types = new[] { typeof(Math), typeof(TSDB), typeof(Date), typeof(Operation), typeof(string), typeof(Math) };
+        private readonly Type[] types = new[] { typeof(Math), typeof(TSDB), typeof(Date), typeof(Operation), typeof(string) };
         private readonly string[] unusedMethods = new[] { "Ceiling", "DivRem", "BigMul", "IEEERemainder",
             "CompareOrdinal", "Copy", "Intern", "IsInterned", "Clone", "op_Equality",  "op_Inequality"};
         private readonly string[] unusedDefenition = new[] { "" };
