@@ -28,5 +28,13 @@ namespace Interpreter.TsdbObjects
         {
             return double.Parse(result1.Value.ToString()) / double.Parse(result2.Value.ToString());
         }
+        public static bool operator >=(TSDBResult result1, TSDBResult result2)
+        {
+            return double.Parse(result1.Value.ToString()) >= double.Parse(result2.Value.ToString());
+        }
+        public static bool operator <=(TSDBResult result1, TSDBResult result2)
+        {
+            return double.Parse(result1.Value.ToString()) <= double.Parse(result2.Value.ToString());
+        }
     }
 }
