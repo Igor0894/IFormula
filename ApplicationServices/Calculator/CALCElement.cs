@@ -7,6 +7,7 @@ using System.Collections.Concurrent;
 using System.Configuration;
 using System.Text.RegularExpressions;
 using System.Linq;
+using System.Runtime.InteropServices;
 
 namespace ApplicationServices.Calculator
 {
@@ -25,7 +26,8 @@ namespace ApplicationServices.Calculator
         public BlockingCollection<CalcAttribute> Attributes = new();
         public BlockingCollection<CalcAttribute> TriggerAttributes = new();
         public List<List<CalcAttribute>> Queue = new();
-        public void Initialization(Attributes children, Element ispElement, Attribute formula, ILogger<CalcService> _logger)
+        public bool SuccessSorted { get; set; }
+        public void Initialize(Attributes children, Element ispElement, Attribute formula, ILogger<CalcService> _logger)
         {
             if (children.Contains("Триггер"))
             {
@@ -81,7 +83,7 @@ namespace ApplicationServices.Calculator
                     item.Expression = item.Expression.Replace(path, variable);
                 }
             }
-            Sort();
+            Sort(_logger);
         }
         private void LoadTriggersTags(Element ispElement, Attribute formula, ILogger<CalcService> _logger)
         {
@@ -108,8 +110,10 @@ namespace ApplicationServices.Calculator
                 TriggerAttributes.Add(item);
             }
         }
-        private void Sort()
+        private void Sort(ILogger<CalcService> _logger)
         {
+            List<string> addedAttributesIndexes = new List<string>() { };
+            List<string> lastAddedAttributesIndexes = new List<string>() { };
             bool sorted = false;
             while (!sorted)
             {
@@ -121,8 +125,22 @@ namespace ApplicationServices.Calculator
                     {
                         changed = MapCalcAttributeAndChangeOrder(i, j);
                         if (changed) 
-                        { 
-                            sorted = false; 
+                        {
+                            string index = i.ToString() + "_" + j.ToString();
+                            if (addedAttributesIndexes.Contains(index)) 
+                            { 
+                                if (lastAddedAttributesIndexes.SequenceEqual(addedAttributesIndexes))
+                                {
+                                    SuccessSorted = false;
+                                    return;
+                                }
+                                else
+                                {
+                                    lastAddedAttributesIndexes = addedAttributesIndexes; addedAttributesIndexes = new List<string> { };
+                                }
+                            }
+                            sorted = false;
+                            addedAttributesIndexes.Add(index);
                             break; 
                         }
                     }
@@ -142,6 +160,7 @@ namespace ApplicationServices.Calculator
                 List<CalcAttribute> calcItems = new() { Attributes.ToArray()[0] };
                 Queue.Add(calcItems);
             }
+            SuccessSorted = true;
         }
         private bool MapCalcAttributeAndChangeOrder(int i, int j)
         {

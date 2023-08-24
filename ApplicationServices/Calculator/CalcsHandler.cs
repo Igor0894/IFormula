@@ -136,7 +136,7 @@ namespace ApplicationServices.Calculator
                             Dictionary<string, List<TSDBSimpleValue>> values = new Dictionary<string, List<TSDBSimpleValue>> { };
                             TSDBSimpleValue valPoint = new TSDBSimpleValue()
                             {
-                                Value = attribute.Value,
+                                Value = attribute.Value.ToString(),
                                 TimestampUTC = ts.ToUniversalTime()
                             };
                             AddCalcedValuesToDict(attribute, valPoint);
@@ -277,11 +277,15 @@ namespace ApplicationServices.Calculator
             {
                 try
                 {
-                    if (typeof(T) == typeof(double) && !double.TryParse(value.Value.ToString(), out double resultDouble))
+                    if (typeof(T) == typeof(double))
                     {
-                        value.Value = resultDouble;
-                        value.Quality = Quality.bad;
-                        //throw new Exception($"Неверный тип данных значения для double: {value.Value}");
+                        bool parsed = double.TryParse(value.Value.ToString(), out double resultDouble);
+                        if(!parsed || double.IsNaN(resultDouble)) 
+                        {
+                            value.Value = resultDouble;
+                            value.Quality = Quality.bad;
+                            //throw new Exception($"Неверный тип данных значения для double: {value.Value}");
+                        }
                     }
                     if (typeof(T) == typeof(long) && !long.TryParse(value.Value.ToString(), out long resultLong))
                     {

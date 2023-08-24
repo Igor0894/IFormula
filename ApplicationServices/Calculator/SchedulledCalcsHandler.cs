@@ -49,13 +49,20 @@ namespace ApplicationServices.Calculator
                         Path = ispElement.Path
                     };
                     Attributes children = ispElement.Attributes.Children(formula.Id);
-                    element.Initialization(children, ispElement, formula, CalcServiceLogger);
-                    if (!element.IsTriggerSchedulle)
+                    element.Initialize(children, ispElement, formula, CalcServiceLogger);
+                    if (!element.IsTriggerSchedulle && element.SuccessSorted)
                     {
                         CalcElements.Add(element);
                         TotalCalcAttributes += element.Attributes.Count;
                     }
-                    TotalCalcAttributes += element.Attributes.Count;
+                    if (element.SuccessSorted)
+                    {
+                        TotalCalcAttributes += element.Attributes.Count;
+                    }
+                    else
+                    {
+                        CalcServiceLogger.LogError($"Имеется зависимость расчётных атрибутов друг от друга. Невозможно отсортировать элемент: {element.Name}");
+                    }
                 }
             }
             if (CalcElements.Count > 0)
