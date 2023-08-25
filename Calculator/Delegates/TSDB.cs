@@ -64,11 +64,11 @@ namespace Interpreter.Delegates
                 await TsdbClient.WriteStringVals(valuesForWrite);
             }
         }
-        public static TSDBResult TagVal(string tagName, object timeStamp = null, string method = "ExactOrPrev")
+        public static TsdbValue TagVal(string tagName, object timeStamp = null, string method = "ExactOrPrev")
         {
             if (string.IsNullOrEmpty(tagName)) { throw new Exception("Не указано имя тега"); }
             if(!methods.ContainsKey(method.ToLower())) { throw new Exception($"Не распознан метод получения значения: {method}"); }
-            TSDBResult tsdbesult = new TSDBResult();
+            TsdbValue tsdbesult = new TsdbValue();
             DateTime ts =DateTime.MinValue;
             if (timeStamp is null || !DateTime.TryParse(timeStamp.ToString(), out ts))
                 throw new Exception("Неверный формат даты");
@@ -112,7 +112,7 @@ namespace Interpreter.Delegates
             TSDBValue tsdbValue = GetTSDBValues(tagName, ts, method).Values.FirstOrDefault()[0];
             return tsdbValue.Quality != Quality.good;
         }
-        public static bool BadVal(TSDBResult value)
+        public static bool BadVal(TsdbValue value)
         {
             return !value.Good;
         }
