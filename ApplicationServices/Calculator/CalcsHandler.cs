@@ -282,40 +282,27 @@ namespace ApplicationServices.Calculator
                         bool parsed = double.TryParse(value.Value.ToString(), out double resultDouble);
                         if(!parsed || double.IsNaN(resultDouble)) 
                         {
-                            value.Value = resultDouble;
                             value.Quality = Quality.bad;
-                            //throw new Exception($"Неверный тип данных значения для double: {value.Value}");
                         }
-                        else
-                        {
-                            value.Value = resultDouble;
-                        }
+                        value.Value = resultDouble;
                     }
                     if (typeof(T) == typeof(long))
                     {
                         bool parsed = long.TryParse(value.Value.ToString(), out long resultLong);
                         if (!parsed)
                         {
-                            value.Value = resultLong;
                             value.Quality = Quality.bad;
                         }
-                        else
-                        {
-                            value.Value = resultLong;
-                        }
+                        value.Value = resultLong;
                     }
                     if (typeof(T) == typeof(float))
                     {
                         bool parsed = float.TryParse(value.Value.ToString(), out float resultFloat);
                         if (!parsed || float.IsNaN(resultFloat))
                         {
-                            value.Value = resultFloat;
                             value.Quality = Quality.bad;
                         }
-                        else
-                        {
-                            value.Value = resultFloat;
-                        }
+                        value.Value = resultFloat;
                     }
                     valuesDict[tagName].Add(value);
                 }
