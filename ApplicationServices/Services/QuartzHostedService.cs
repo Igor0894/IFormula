@@ -1,5 +1,6 @@
 ﻿using System.Collections.Concurrent;
 using System.Text.Json;
+using System.Threading;
 using System.Xml.Linq;
 using ApplicationServices.Calculator;
 using ApplicationServices.Scheduller.Jobs;
@@ -20,6 +21,7 @@ public class QuartzHostedService : IHostedService
     CalcServiceCollector CalcServiceCollector { get; set; }
     private readonly ISchedulerFactory schedulerFactory;
     private readonly IJobFactory jobFactory;
+    private Task initializeAndStartNodesTask;
 
     public QuartzHostedService(
         ISchedulerFactory schedulerFactory,
@@ -34,7 +36,12 @@ public class QuartzHostedService : IHostedService
     }
     public IScheduler Scheduler { get; set; }
 
-    public async Task StartAsync(CancellationToken cancellationToken)
+    public Task StartAsync(CancellationToken cancellationToken)
+    {
+        initializeAndStartNodesTask = InitializeAndStartNodes(cancellationToken);
+        return Task.CompletedTask;
+    }
+    public async Task InitializeAndStartNodes(CancellationToken cancellationToken)
     {
         Scheduler = await schedulerFactory.GetScheduler(cancellationToken);
         Scheduler.JobFactory = jobFactory;
