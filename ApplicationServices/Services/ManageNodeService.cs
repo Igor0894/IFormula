@@ -92,6 +92,13 @@ namespace ApplicationServices.Services
             await Task.Run(() => StartRecalcNode(name, start, end));
             return Results.Ok();
         }
+        public Dictionary<string, string> GetElementCalcAtributesValue(string elementName)
+        {
+            Dictionary<string, string> elementAtributes;
+            CalcService calcService = CalcServiceCollector.GetCalcServiceByElementName(elementName);
+            elementAtributes = calcService.GetElementCalcAtributesValue(elementName);
+            return elementAtributes;
+        }
         private async Task StartRecalcNode(string name, DateTime start, DateTime end)
         {
             await recalcSemaphore.WaitAsync();

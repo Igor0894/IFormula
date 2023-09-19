@@ -35,5 +35,10 @@ namespace IFormula.Controllers
         {
             return await ManageNodeService.RecalcNode(name, startTimeLocal, endTimeLocal);
         }
+        [HttpGet("GetElementCalcAtributesValue")]
+        public Dictionary<string,string> GetElementCalcAtributesValue(string elementName)
+        {
+            return ManageNodeService.GetElementCalcAtributesValue(elementName);
+        }
     }
 }

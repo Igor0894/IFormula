@@ -21,6 +21,40 @@ namespace ApplicationServices.Services
         public bool TriggerInitialized { get; set; } = false;
         private SchedulledCalcsHandler schedulledCalcsHandler;
         private TriggerCalcsHandler triggerCalcsHandler;
+        public bool ExistCalcElementByName(string elementName)
+        {
+            foreach (var element in schedulledCalcsHandler.CalcElements)
+            {
+                if (element.Name == elementName) return true;
+            }
+            foreach (var element in triggerCalcsHandler.CalcElements)
+            {
+                if (element.Name == elementName) return true;
+            }
+            return false;
+        }
+        private CalcElement GetCalcElementByName(string elementName)
+        {
+            foreach (var element in schedulledCalcsHandler.CalcElements)
+            {
+                if (element.Name == elementName) return element;
+            }
+            foreach (var element in triggerCalcsHandler.CalcElements)
+            {
+                if (element.Name == elementName) return element;
+            }
+            return null;
+        }
+        public Dictionary<string, string> GetElementCalcAtributesValue(string elementName)
+        {
+            Dictionary<string, string> atributesValue = new Dictionary<string, string>();
+            CalcElement calcElement = GetCalcElementByName(elementName);
+            foreach(var atribute in calcElement.Attributes)
+            {
+                atributesValue.Add(atribute.Name, atribute.Value.ToString());
+            }
+            return atributesValue;
+        }
         public bool HaveSchedulledElements 
         { 
             get

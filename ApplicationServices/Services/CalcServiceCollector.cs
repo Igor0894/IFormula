@@ -45,5 +45,13 @@ namespace ApplicationServices.Services
             await calcService.InitializeModel(CalcMode.Recalc);
             return calcService;
         }
+        public CalcService GetCalcServiceByElementName(string elementName)
+        {
+            foreach(var calcService in CalcServices.Values)
+            {
+                if(calcService.ExistCalcElementByName(elementName)) return calcService;
+            }
+            throw new Exception($"Запрашиваемый элемент [{elementName}] не найден в запущенных узлах расчётов.");
+        }
     }
 }
