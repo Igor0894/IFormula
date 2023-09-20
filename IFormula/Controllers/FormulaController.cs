@@ -35,10 +35,13 @@ namespace IFormula.Controllers
         {
             return await ManageNodeService.RecalcNode(name, startTimeLocal, endTimeLocal);
         }
-        [HttpGet("GetElementCalcAtributesValue")]
-        public Dictionary<string,string> GetElementCalcAtributesValue(string elementName)
+        [HttpGet("GetElementCalcAtributesCurrentValue")]
+        public async Task<Dictionary<string,string>> GetElementCalcAtributesCurrentValue(string elementName)
         {
-            return ManageNodeService.GetElementCalcAtributesValue(elementName);
+            Task<Dictionary<string, string>> task = new Task<Dictionary<string, string>>(() => ManageNodeService.GetElementCalcAtributesValue(elementName));
+            task.Start();
+            await task.WaitAsync(new TimeSpan(0, 5, 0));
+            return task.Result;
         }
     }
 }

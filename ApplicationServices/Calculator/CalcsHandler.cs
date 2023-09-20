@@ -167,6 +167,7 @@ namespace ApplicationServices.Calculator
             catch (Exception ex)
             {
                 innerLog.Add("ОШИБКА! " + "Атрибут: " + attribute.Name + " | Функция: " + attribute.Expression + ". " + ex.Message + "\n");
+                attribute.Value = ex.Message;
             }
         }
         private void AddCalcedValuesToDict(CalcAttribute attribute, TSDBSimpleValue valPoint)
