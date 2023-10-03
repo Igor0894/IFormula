@@ -531,6 +531,21 @@ namespace TSDBWorkerAPI
                 throw new Exception($"При попытке получения информацию о теге [{Tag}] возникла проблема!\nСтатус: {response.StatusCode}");
             }
         }
+        public async Task<string[]> GetTagsByPointSource(string pointSource)
+        {
+            RestRequest request = new RestRequest(_TSDBServerURI + "/Admin/SearchTags", Method.Post);
+            var body = "[{ \"Code\":\"PointSource\", \"ValueSearchTmpl\":\"" + pointSource + "\" }]";
+            RestResponse response = await ExecuteRequest(request, body);
+            if (response.StatusCode == HttpStatusCode.OK)
+            {
+                string[] TagInfo = JsonConvert.DeserializeObject<string[]>(response.Content);
+                return TagInfo;
+            }
+            else
+            {
+                throw new Exception($"При попытке получения списка тегов с PointSource [{pointSource}] возникла проблема!\nСтатус: {response.StatusCode}");
+            }
+        }
         private TSDBValue GetTsdbValue<T>(Datapoint apiValue, string tagName)
         {
             string annotation = apiValue.annotation is null ? "" : apiValue.annotation;
