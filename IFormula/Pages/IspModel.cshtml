@@ -1,0 +1,66 @@
+﻿@page
+@model IFormula.Pages.IspModelModel
+@addTagHelper*, Microsoft.AspNetCore.Mvc.TagHelpers
+
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Index</title>
+</head>
+<body>
+    <div id="jstree">
+    </div>
+    <form method="post">
+        <input type="hidden" name="selectedItems" id="selectedItems" />
+        <input type="submit" value="Submit" asp-page-handler="Submit" />
+    </form>
+    <link rel="stylesheet" href="~/Static/Css/cdnjs.cloudflare.com_ajax_libs_jstree_3.2.1_themes_default_style.min.css" />
+    <script type="text/javascript" src="~/Static/Js/cdnjs.cloudflare.com_ajax_libs_jquery_1.12.1_jquery.min.js"></script>
+    <script type="text/javascript" src="~/Static/Js/cdnjs.cloudflare.com_ajax_libs_jstree_3.2.1_jstree.min.js"></script>
+    <script type="text/javascript">
+        $(function () {
+            $('#jstree').on('changed.jstree', function (e, data) {
+                var i, j;
+                var selectedItems = [];
+                for (i = 0, j = data.selected.length; i < j; i++) {
+
+                    //Fetch the Id.
+                    var id = data.selected[i];
+
+                    //Remove the ParentId.
+                    if (id.indexOf('-') != -1) {
+                        id = id.split("-")[1];
+                    }
+
+                    //Add the Node to the JSON Array.
+                    selectedItems.push({
+                        text: data.instance.get_node(data.selected[i]).text,
+                        id: id,
+                        parent: data.node.parents[0]
+                    });
+                }
+
+                //Serialize the JSON Array and save in HiddenField.
+                $('#selectedItems').val(JSON.stringify(selectedItems));
+            }).jstree({
+                "core": {
+                    "themes": {
+                        "variant": "large"
+                    },
+                    "data": @Html.Raw(Model.TreeViewJSON)
+                        },
+                "checkbox": {
+                    "keep_selected_style": false
+                },
+                "plugins": ["wholerow", "checkbox"],
+            });
+        });
+    </script>
+</body>
+</html>

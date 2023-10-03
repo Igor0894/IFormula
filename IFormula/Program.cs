@@ -8,6 +8,7 @@ using Quartz.Impl;
 using IFormula.Middlewares;
 using TSDBWorkerAPI.Models;
 using TSDBWorkerAPI;
+using Microsoft.AspNetCore.Builder;
 
 var logger = LogManager.Setup().LoadConfigurationFromAppSettings().GetCurrentClassLogger();
 var builder = WebApplication.CreateBuilder(args);
@@ -24,6 +25,7 @@ builder.Services.AddSingleton<IJobFactory,JobFactory>();
 builder.Services.AddSingleton<CalcServiceCollector>();
 builder.Services.AddSingleton<ISchedulerFactory, StdSchedulerFactory>();
 builder.Services.AddSingleton<ManageNodeService>();
+builder.Services.AddSingleton<FormulaConfiguratorService>();
 builder.Services.AddSingleton(w => new TsdbClient(builder.Configuration.GetSection("TsdbSettings").Get<TsdbSettings>()));
 builder.Services.AddHostedService<QuartzHostedService>();
 builder.Services.AddCors(options =>
@@ -35,7 +37,7 @@ builder.Services.AddCors(options =>
         policy.AllowAnyOrigin();
     });
 });
-
+builder.Services.AddRazorPages();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -52,6 +54,9 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.UseMiddleware<ExceptionsMiddleware>();
+app.MapRazorPages();
+
+app.UseStaticFiles();
 
 app.Logger.LogInformation("Application started\r\n");
 

@@ -7,10 +7,10 @@ namespace IFormula.Controllers
     [Route("")]
     [ApiController]
     [EnableCors]
-    public class FormulaController : Controller
+    public class FormulaManageController : Controller
     {
         ManageNodeService ManageNodeService { get; set; }
-        public FormulaController(ManageNodeService ManageNodeService)
+        public FormulaManageController(ManageNodeService ManageNodeService)
         {
             this.ManageNodeService = ManageNodeService;
 

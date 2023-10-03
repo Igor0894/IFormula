@@ -9,6 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="jsTree" Version="3.1.1.2" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.18.1" />
     <PackageReference Include="NLog.Web.AspNetCore" Version="5.3.0" />
     <PackageReference Include="Quartz.AspNetCore" Version="3.6.2" />
@@ -23,6 +24,18 @@
     <Content Update="NLog.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Views\Css\cdnjs.cloudflare.com_ajax_libs_jstree_3.2.1_themes_default_style.min.css">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Views\Js\cdnjs.cloudflare.com_ajax_libs_jquery_1.12.1_jquery.min.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Views\Js\cdnjs.cloudflare.com_ajax_libs_jstree_3.2.1_jstree.min.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>
