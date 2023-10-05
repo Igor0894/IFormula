@@ -47,7 +47,7 @@ namespace ApplicationServices.Services
                 {
                     TreeViewNode node = new TreeViewNode()
                     {
-                        id = ispElement.Guid.ToString() + "-" + model.Guid.ToString(),
+                        id = ispElement.Guid.ToString(),
                         text = ispElement.Name,
                         parent = model.Guid.ToString()
                     };
