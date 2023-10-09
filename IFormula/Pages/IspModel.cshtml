@@ -25,6 +25,19 @@
     <script type="text/javascript" src="~/Js/cdnjs.cloudflare.com_ajax_libs_jstree_3.3.16_jstree.min.js"></script>
     <script type="text/javascript">
         $(function () {
+            $('#jstree').on('open_node.jstree', function (e, data) {
+                var Elementsid = data.children;
+                console.log(data);
+                $.ajax({
+                    type: "GET",
+                    url: '@Url.Action("GetChildren", "Configurator")',
+                    contentType: "application/json; charset=utf-8",
+                    data: { id: Elementsid, isRoot: false },
+                    dataType: "json",
+                    success: function (data) { console.log(data); },
+                    error: function (data) { alert(data); }
+                })
+            });
             $('#jstree').on('changed.jstree', function (e, data) {
                 var i, j;
                 var selectedItems = [];
@@ -49,7 +62,7 @@
                         "variant": "large"
                     },
                     "data": @Html.Raw(Model.TreeViewJSON)
-                        },
+                                },
                 "checkbox": {
                     "keep_selected_style": false
                 },

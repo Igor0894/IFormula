@@ -16,12 +16,11 @@ namespace IFormula.Pages
         }
         public void OnGet()
         {
-            TreeViewNode[] nodes = FormulaConfiguratorService.GetBaseElementTreeViewNodes();
+            TreeViewNode[] nodes = FormulaConfiguratorService.GetChildren(null, true);
 
             //Serialize to JSON string.
             this.TreeViewJSON = JsonConvert.SerializeObject(nodes);
         }
-
         public void OnPostSubmit(string selectedItems)
         {
             List<TreeViewNode> items = JsonConvert.DeserializeObject<List<TreeViewNode>>(selectedItems);

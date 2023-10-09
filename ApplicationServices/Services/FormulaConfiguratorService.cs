@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using TSDBWorkerAPI;
 using ApplicationServices.Models;
 using System.Data;
+using System.Reflection;
 
 namespace ApplicationServices.Services
 {
@@ -27,7 +28,18 @@ namespace ApplicationServices.Services
             ConnectionString = configuration.GetConnectionString("DefaultConnection");
             TsdbWorker = tsdbWorker;
         }
-        public TreeViewNode[] GetBaseElementTreeViewNodes()
+        public TreeViewNode[] GetChildren(string id, bool isRoot)
+        {
+            if (isRoot)
+            {
+                return GetBaseElementTreeViewNodes();
+            }
+            else
+            {
+                return LoadChildElementsForElement(id);
+            }
+        }
+        private TreeViewNode[] GetBaseElementTreeViewNodes()
         {
             IspModel[] ispModels = LoadModels();
             List<TreeViewNode> nodes = new List<TreeViewNode>();
@@ -102,7 +114,7 @@ namespace ApplicationServices.Services
             }
             return elements.ToArray();
         }
-        private IspElement[] LoadChildElementsForElement(Guid parentElementGuid)
+        private TreeViewNode[] LoadChildElementsForElement(string parentElementGuid)
         {
             List<IspElement> elements = new List<IspElement>();
             string query = "SELECT er.[ElementId], e.[Name]\r\n" +
@@ -124,7 +136,20 @@ namespace ApplicationServices.Services
                 }
                 dr.Close();
             }
-            return elements.ToArray();
+
+            List<TreeViewNode> nodes = new List<TreeViewNode>();
+            foreach (IspElement ispElement in elements)
+            {
+                TreeViewNode node = new TreeViewNode()
+                {
+                    id = ispElement.Guid.ToString(),
+                    text = ispElement.Name,
+                    parent = parentElementGuid
+                };
+                nodes.Add(node);
+            }
+
+            return nodes.ToArray();
         }
     }
 }
