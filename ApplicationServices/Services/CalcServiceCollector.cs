@@ -1,5 +1,6 @@
 ﻿using ApplicationServices.Calculator;
 using ApplicationServices.Scheduller.Models;
+using Interpreter.Delegates;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System.Collections.Concurrent;
@@ -10,11 +11,12 @@ namespace ApplicationServices.Services
     public class CalcServiceCollector
 #nullable disable
     {
-        private ILogger<CalcService> CalcServiceLogger { get; set; }
+        private ILogger<CalcNodeService> CalcServiceLogger { get; set; }
         private ILogger<SchedulledCalcsHandler> CalcHandlerLogger { get; set; }
         private string ConnectionString { get; set; }
         private TsdbClient TsdbWorker { get; set; }
-        public CalcServiceCollector(ILogger<CalcService> calcServiceLogger, ILogger<SchedulledCalcsHandler> calcHandlerLogger, TsdbClient tsdbWorker, IConfiguration configuration
+        private ConcurrentDictionary<string, CalcNodeService> CalcServices { get; set; } = new ConcurrentDictionary<string, CalcNodeService>();
+        public CalcServiceCollector(ILogger<CalcNodeService> calcServiceLogger, ILogger<SchedulledCalcsHandler> calcHandlerLogger, TsdbClient tsdbWorker, IConfiguration configuration
             , ILogger<TsdbClient> tsdbClientLogger)
         {
             CalcServiceLogger = calcServiceLogger;
@@ -22,30 +24,34 @@ namespace ApplicationServices.Services
             ConnectionString = configuration.GetConnectionString("DefaultConnection");
             TsdbWorker = tsdbWorker;
             TsdbWorker.logger = tsdbClientLogger;
+            TSDB.TsdbClient = tsdbWorker;
         }
-        private ConcurrentDictionary<string, CalcService> CalcServices { get; set; } = new ConcurrentDictionary<string, CalcService>();
+        public string[] GetNodesNames()
+        {
+            return CalcServices.Keys.ToArray();
+        }
         public async Task AddCalcService(CalcNode node)
         {
-            CalcService calcService = new(CalcServiceLogger, CalcHandlerLogger, ConnectionString, node, TsdbWorker);
+            CalcNodeService calcService = new(CalcServiceLogger, CalcHandlerLogger, ConnectionString, node);
             await calcService.InitializeModel(CalcMode.Schedulled);
             if (CalcServices.ContainsKey(node.SearchAttribute)) { CalcServices[node.SearchAttribute] = calcService; }
             else { CalcServices.TryAdd(node.SearchAttribute, calcService); }
         }
         public void DeleteCalcService(string name)
         {
-            if (CalcServices.ContainsKey(name)) { CalcServices.TryRemove(name, out CalcService calcService); }
+            if (CalcServices.ContainsKey(name)) { CalcServices.TryRemove(name, out CalcNodeService calcService); }
         }
-        public CalcService GetSchedulledAndTriggeredCalcService(string name)
+        public CalcNodeService GetSchedulledAndTriggeredCalcService(string name)
         {
             return CalcServices[name];
         }
-        public async Task<CalcService> GetRecalcCalcService(CalcNode node)
+        public async Task<CalcNodeService> GetRecalcCalcService(CalcNode node)
         {
-            CalcService calcService = new(CalcServiceLogger, CalcHandlerLogger, ConnectionString, node, TsdbWorker);
+            CalcNodeService calcService = new(CalcServiceLogger, CalcHandlerLogger, ConnectionString, node);
             await calcService.InitializeModel(CalcMode.Recalc);
             return calcService;
         }
-        public CalcService GetCalcServiceByElementName(string elementName)
+        public CalcNodeService GetCalcServiceByElementName(string elementName)
         {
             foreach(var calcService in CalcServices.Values)
             {

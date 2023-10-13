@@ -7,17 +7,12 @@ using System.Diagnostics;
 using System.Text;
 using Interpreter.Delegates;
 using TSDBWorkerAPI;
-using TSDBWorkerAPI.Models;
 using ApplicationServices.Scheduller.Models;
 using ISP.SDK.IspObjects;
 using Attribute = ISP.SDK.IspObjects.Attribute;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
-using Quartz.Logging;
-using System.IO;
-using System;
-using ApplicationServices.Scheduller.Jobs;
-using Newtonsoft.Json.Linq;
+using System.Linq;
 
 namespace ApplicationServices.Calculator
 {
@@ -25,10 +20,9 @@ namespace ApplicationServices.Calculator
 #nullable disable
     {
         internal ILogger<CalcsHandler> Logger { get; set; }
-        internal ILogger<CalcService> CalcServiceLogger { get; set; }
+        internal ILogger<CalcNodeService> CalcServiceLogger { get; set; }
         public CalcNode Node { get; set; }
         public List<CalcElement> CalcElements { get; set; } = new List<CalcElement>();
-        
         internal Dictionary<string, Value_Type> OutputTagsTypes { get; set; }
         internal Mutex logMutex = new Mutex();
         internal ConcurrentDictionary<string, List<TSDBSimpleValue>> ValuesForWrite;
@@ -37,10 +31,44 @@ namespace ApplicationServices.Calculator
         internal StringBuilder log = new();
         internal List<string> calcLog;
         internal Stopwatch timer;
-        public CalcsHandler(ILogger<CalcsHandler> logger, ILogger<CalcService> calcServiceLogger)
+        public CalcsHandler(ILogger<CalcsHandler> logger, ILogger<CalcNodeService> calcServiceLogger)
         {
             Logger = logger;
             CalcServiceLogger = calcServiceLogger;
+        }
+        public async Task TestElementInitialization(string ConnectionString, Guid elementId, CalcNode[] nodes)
+        {
+            Server server = new()
+            {
+                ConnectionString = ConnectionString
+            };
+            Element ispElement = server.GetElement(elementId);
+            if(ispElement.Id == null) { throw new Exception($"Не найден элемент с Guid: {elementId}."); }
+            if (ispElement.Attributes.Properties.Where(atr => nodes.Select(node => node.SearchAttribute).ToArray().Contains(atr.Name)).Count() == 0) { throw new Exception($"В элементе с Guid: {elementId} не найден атрибут из переченя Nodes.json."); }
+            string searchAttribute = ispElement.Attributes.Properties.Where(atr => nodes.Select(node => node.SearchAttribute).ToArray().Contains(atr.Name)).FirstOrDefault().Name;
+            Node = nodes.Where(node => node.SearchAttribute == searchAttribute).FirstOrDefault();
+            Prepair(CalcMode.Test);
+            Attribute formula = ispElement.Attributes.Properties.Item(searchAttribute);
+            CalcElement element = new()
+            {
+                Id = ispElement.Id,
+                Name = ispElement.Name,
+                Path = ispElement.Path
+            };
+            Attributes children = ispElement.Attributes.Children(formula.Id);
+            element.Initialize(children, ispElement, formula, CalcServiceLogger);
+            if (element.SuccessSorted)
+            {
+                CalcElements.Add(element);
+                TotalCalcAttributes += element.Attributes.Count;
+            }
+            else
+            {
+                throw new Exception($"Имеется зависимость расчётных атрибутов друг от друга. Невозможно отсортировать элемент: {element.Name}");
+            }
+            Logger.LogInformation($"Тестируемый элемент: {element.Name} инициализирован. Расчётных атрибутов: {TotalCalcAttributes}");
+            int totalTags = await GetTagsTypesForOutputTags();
+            Logger.LogInformation($"Тестируемый элемент: {element.Name}. Считаны типы данных {totalTags} выходных тегов. Входных тегов в формулах: {TotalQueriesInCalcAttributes}\r\n");
         }
         internal async Task<int> GetTagsTypesForOutputTags()
         {
@@ -103,6 +131,33 @@ namespace ApplicationServices.Calculator
             }
             
         }
+        internal void CalculateTestElements(DateTime ts)
+        {
+            if (CalcElements.Count == 0) { return; }
+            Prepair(CalcMode.Test);
+            try
+            {
+                log.AppendFormat("Запуск расчета: {0}\r\n", ts);
+                Parallel.ForEach(CalcElements, e =>
+                {
+                    CalculateElement(e, ts);
+                });
+                log.Append(string.Join("", calcLog));
+                if (ValuesForWrite.Count > 0)
+                {
+                    log.AppendFormat($"Тестовый расчет формул успешно завершен. Запись {ValuesForWrite.Count} выходных значений в теги TSDB производится не будет.\r\n");
+                }
+                timer.Stop();
+                TimeSpan time = timer.Elapsed;
+                log.AppendFormat("Расчет успешно завершен: время выполнения {0}", time.ToString(@"m\:ss\.fff"));
+                SendLog(log.ToString(), false);
+            }
+            catch (Exception e)
+            {
+                log.AppendFormat("Ошибка при итерации тестового расчета по расписанию:\n{0}\n{1}\n{2}\r\n", e.Message, e.StackTrace, e.InnerException);
+                SendLog(log.ToString(), true);
+            }
+        }
         private void CalculateQueue(CalcElement element, List<CalcAttribute> calcAttributes, BlockingCollection<string> innerLog, DateTime ts)
         {
             Parallel.For(0, calcAttributes.Count, (i, state) =>
@@ -122,7 +177,6 @@ namespace ApplicationServices.Calculator
             try
             {
                 attribute.Value = element.Interpreter.Eval(attribute.Expression.ToLower());
-                //attribute.Value = element.Interpreter.Eval(attribute.Expression);
                 string log = "[Очередь №" + attribute.Order + "] Атрибут: " + attribute.Name + " | Функция: " + attribute.Expression + " | Результат: " + attribute.Value;
                 DateTime ts;
                 if (attribute.Value.ToString() == (double.MinValue + 1).ToString()) state.Break(); //Exit
@@ -166,8 +220,8 @@ namespace ApplicationServices.Calculator
             }
             catch (Exception ex)
             {
-                innerLog.Add("ОШИБКА! " + "Атрибут: " + attribute.Name + " | Функция: " + attribute.Expression + ". " + ex.Message + "\n");
-                attribute.Value = ex.Message;
+                innerLog.Add("ОШИБКА! " + "Атрибут: " + attribute.Name + " | Формула: " + attribute.Expression + ". " + ex.Message + "\n");
+                attribute.Value = "Ошибка в формуле: " + attribute.Expression + ". " + ex.Message;
             }
         }
         private void AddCalcedValuesToDict(CalcAttribute attribute, TSDBSimpleValue valPoint)
@@ -329,7 +383,6 @@ namespace ApplicationServices.Calculator
             timer = new();
             timer.Start();
             log.Clear();
-            
         }
     }
 }

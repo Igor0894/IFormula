@@ -4,13 +4,13 @@ using ApplicationServices.Services;
 
 namespace IFormula.Controllers
 {
-    [Route("")]
+    [Route("NodesManager")]
     [ApiController]
     [EnableCors]
-    public class FormulaManageController : Controller
+    public class NodesManagerController : Controller
     {
-        ManageNodeService ManageNodeService { get; set; }
-        public FormulaManageController(ManageNodeService ManageNodeService)
+        NodesManagerService ManageNodeService { get; set; }
+        public NodesManagerController(NodesManagerService ManageNodeService)
         {
             this.ManageNodeService = ManageNodeService;
 

@@ -13,6 +13,7 @@
     {
         Schedulled,
         Recalc,
-        Trigger
+        Trigger,
+        Test
     }
 }

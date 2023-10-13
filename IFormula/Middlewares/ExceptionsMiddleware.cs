@@ -5,8 +5,8 @@ namespace IFormula.Middlewares
 {
     public class ExceptionsMiddleware : IMiddleware
     {
-        private ILogger<CalcService> Logger { get; set; }
-        public ExceptionsMiddleware(ILogger<CalcService> logger)
+        private ILogger<CalcNodeService> Logger { get; set; }
+        public ExceptionsMiddleware(ILogger<CalcNodeService> logger)
         {
             Logger = logger;
         }

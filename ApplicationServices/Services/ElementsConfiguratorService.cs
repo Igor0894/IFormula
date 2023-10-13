@@ -1,32 +1,65 @@
 ﻿using ApplicationServices.Calculator;
 using ApplicationServices.Entityes;
-using ISP.SDK.IspObjects;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
 using System.Data.SqlClient;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using TSDBWorkerAPI;
 using ApplicationServices.Models;
-using System.Data;
-using System.Reflection;
+using ApplicationServices.Scheduller.Models;
 
 namespace ApplicationServices.Services
 {
-    public class FormulaConfiguratorService
+    public class ElementsConfiguratorService
 #nullable disable
     {
-        private ILogger<FormulaConfiguratorService> FormulaConfiguratorLogger { get; set; }
+        private ILogger<ElementsConfiguratorService> ElementsConfiguratorLogger { get; set; }
         private string ConnectionString { get; set; }
-        private TsdbClient TsdbWorker { get; set; }
-        public FormulaConfiguratorService(ILogger<FormulaConfiguratorService> formulaConfiguratorLogger, TsdbClient tsdbWorker, IConfiguration configuration)
+        private ILogger<CalcNodeService> CalcServiceLogger { get; set; }
+        private ILogger<SchedulledCalcsHandler> CalcHandlerLogger { get; set; }
+        public ElementsConfiguratorService(ILogger<ElementsConfiguratorService> formulaConfiguratorLogger, IConfiguration configuration
+            , ILogger<CalcNodeService> calcServiceLogger, ILogger<SchedulledCalcsHandler> calcHandlerLogger)
         {
-            FormulaConfiguratorLogger = formulaConfiguratorLogger;
+            ElementsConfiguratorLogger = formulaConfiguratorLogger;
             ConnectionString = configuration.GetConnectionString("DefaultConnection");
-            TsdbWorker = tsdbWorker;
+            CalcServiceLogger = calcServiceLogger;
+            CalcHandlerLogger = calcHandlerLogger;
+        }
+        public async Task<Dictionary<string, string>> GetTestElementCalcAtributesValue(Guid elementId)
+        {
+            CalcsHandler calcsHandler = new CalcsHandler(CalcHandlerLogger, CalcServiceLogger);
+            CalcNode[] nodes = GetNodesFromFile();
+            await calcsHandler.TestElementInitialization(ConnectionString, elementId, nodes);
+            calcsHandler.CalculateTestElements(DateTime.Now);
+
+            Dictionary<string, string> atributesValue = new Dictionary<string, string>();
+            foreach (var element in calcsHandler.CalcElements)
+            {
+                if (element.Id == elementId.ToString())
+                {
+                    CalcElement calcElement = element;
+                    foreach (var atribute in calcElement.Attributes)
+                    {
+                        atributesValue.Add(atribute.Name, atribute.Value.ToString());
+                    }
+                    break;
+                }
+            }
+            return atributesValue;
+        }
+        private CalcNode[] GetNodesFromFile()
+        {
+            CalcNode[] nodes = new CalcNode[] { };
+            using (FileStream fs = new("Nodes.json", FileMode.OpenOrCreate))
+            {
+                if (fs != null)
+                {
+                    nodes = System.Text.Json.JsonSerializer.Deserialize<CalcNode[]>(fs)!;
+                }
+                else
+                {
+                    throw new Exception($"В файле Nodes.json XML некорректного формата");
+                }
+            }
+            return nodes;
         }
         public TreeViewNode[] GetChildren(string id, bool isRoot)
         {

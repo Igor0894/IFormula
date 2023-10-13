@@ -9,8 +9,8 @@ namespace IFormula.Pages
     public class IspModelModel : PageModel
     {
         public string TreeViewJSON { get; set; }
-        FormulaConfiguratorService FormulaConfiguratorService { get; set; }
-        public IspModelModel(FormulaConfiguratorService formulaConfiguratorService)
+        ElementsConfiguratorService FormulaConfiguratorService { get; set; }
+        public IspModelModel(ElementsConfiguratorService formulaConfiguratorService)
         {
             FormulaConfiguratorService = formulaConfiguratorService;
         }

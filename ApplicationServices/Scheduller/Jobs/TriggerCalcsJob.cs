@@ -22,7 +22,7 @@ namespace ApplicationServices.Scheduller.Jobs
             ScopeContext.PushProperty("calcMode", CalcMode.Trigger.ToString());
             JobDataMap dataMap = context.JobDetail.JobDataMap;
             string name = dataMap.GetString("name");
-            CalcService calcService = CalcServiceCollector.GetSchedulledAndTriggeredCalcService(name);
+            CalcNodeService calcService = CalcServiceCollector.GetSchedulledAndTriggeredCalcService(name);
             if (!calcService.TriggerInitialized)
             {
                 logger.LogError($"TriggerCalcsJob по задаче {name} пропущен потому что узел расчёта не инициализирован");

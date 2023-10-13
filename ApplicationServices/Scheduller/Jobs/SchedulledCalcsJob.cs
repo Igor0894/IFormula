@@ -22,7 +22,7 @@ namespace ApplicationServices.Scheduller.Jobs
             ScopeContext.PushProperty("calcMode", CalcMode.Schedulled.ToString());
             JobDataMap dataMap = context.JobDetail.JobDataMap;
             string name = dataMap.GetString("name");
-            CalcService calcService = CalcServiceCollector.GetSchedulledAndTriggeredCalcService(name);
+            CalcNodeService calcService = CalcServiceCollector.GetSchedulledAndTriggeredCalcService(name);
             if (!calcService.SchedulledInitialized)
             {
                 /*logger.LogError($"SchedulledCalcsJob по задаче {name} остановлен потому что узел расчёта не инициализирован");
@@ -34,7 +34,7 @@ namespace ApplicationServices.Scheduller.Jobs
             DateTime ts = context.FireTimeUtc.DateTime.ToLocalTime();
             if (calcService.HaveSchedulledElements) { await RunCalc(name, ts, calcService); }
         }
-        public async Task RunCalc(string name, DateTime startTs, CalcService calcService)
+        public async Task RunCalc(string name, DateTime startTs, CalcNodeService calcService)
         {
             logger.LogDebug($"Запущена задача: {name} с меткой времени {startTs}");
             await calcService.RunSchedulledCalcs(startTs);

@@ -1,20 +1,16 @@
 ﻿using Microsoft.Extensions.Logging;
-using TSDBWorkerAPI.Models;
 using ApplicationServices.Calculator;
 using ApplicationServices.Scheduller.Models;
 using CronExpressionDescriptor;
-using TSDBWorkerAPI;
 using NCrontab;
 using ApplicationServices.Scheduller.Jobs;
-using System.Xml.Linq;
-using Interpreter.Delegates;
 
 namespace ApplicationServices.Services
 {
-    public class CalcService
+    public class CalcNodeService
 #nullable disable
     {
-        private ILogger<CalcService> Logger { get; set; }
+        private ILogger<CalcNodeService> Logger { get; set; }
         public static string ConnectionString { get; set; }
         public CalcNode Node { get; set; }
         public bool SchedulledInitialized { get; set; }  = false;
@@ -69,15 +65,14 @@ namespace ApplicationServices.Services
                 return triggerCalcsHandler.CalcElements.Count > 0;
             }
         }
-        public CalcService(ILogger<CalcService> calcServiceLogger, ILogger<CalcsHandler> calcHandlerLogger, string connectionString, CalcNode calcNode, TsdbClient tsdbWorker)
+        public CalcNodeService(ILogger<CalcNodeService> calcServiceLogger, ILogger<CalcsHandler> calcHandlerLogger, string connectionString, CalcNode calcNode)
         {
             try
             {
                 Logger = calcServiceLogger;
                 ConnectionString = connectionString;
                 Node = calcNode;
-                tsdbWorker.UpdateSession();
-                TSDB.TsdbClient = tsdbWorker;
+                
                 schedulledCalcsHandler = new SchedulledCalcsHandler(calcHandlerLogger, calcServiceLogger);
                 triggerCalcsHandler = new TriggerCalcsHandler(calcHandlerLogger, calcServiceLogger);
             }

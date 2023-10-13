@@ -20,7 +20,7 @@ namespace TSDBWorkerAPI
         string _Pass = "";
         public bool IsConnected = false;
         private LoginResStruct loginData;
-        private DateTime lastTokenUpdate;
+        private DateTime lastTokenUpdate = DateTime.MinValue;
         public TsdbClient(TsdbSettings tsdbSettings)
         {
             _TSDBServerURI = tsdbSettings.TSDBAddress;
@@ -595,10 +595,10 @@ namespace TSDBWorkerAPI
         }
         private async Task<RestResponse> ExecuteRequest(RestRequest request, string body)
         {
+            if (lastTokenUpdate == DateTime.MinValue || DateTime.Now - lastTokenUpdate > new TimeSpan(0, 0, loginData.expires_in - 3600)) { await UpdateSession(); }
             request.AddHeader("Content-Type", "application/json");
             request.AddHeader("Authorization", string.Format("Bearer {0}", loginData.access_token));
             if (!string.IsNullOrEmpty(body)) { request.AddParameter("application/json", body, ParameterType.RequestBody); }
-            if (DateTime.Now - lastTokenUpdate > new TimeSpan(0, 0, loginData.expires_in - 3600)) { await UpdateSession(); }
             try
             {
                 if (useTimeout) { request.Timeout = timeout; }

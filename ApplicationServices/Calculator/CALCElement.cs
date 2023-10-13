@@ -21,13 +21,13 @@ namespace ApplicationServices.Calculator
         public Interpreter.Interpreter Interpreter = new();
         public SQL Sql = new()
         {
-            ConnectionString = CalcService.ConnectionString
+            ConnectionString = CalcNodeService.ConnectionString
         };
         public BlockingCollection<CalcAttribute> Attributes = new();
         public BlockingCollection<CalcAttribute> TriggerAttributes = new();
         public List<List<CalcAttribute>> Queue = new();
         public bool SuccessSorted { get; set; }
-        public void Initialize(Attributes children, Element ispElement, Attribute formula, ILogger<CalcService> _logger)
+        public void Initialize(Attributes children, Element ispElement, Attribute formula, ILogger<CalcNodeService> _logger)
         {
             if (children.Contains("Триггер"))
             {
@@ -85,7 +85,7 @@ namespace ApplicationServices.Calculator
             }
             Sort(_logger);
         }
-        private void LoadTriggersTags(Element ispElement, Attribute formula, ILogger<CalcService> _logger)
+        private void LoadTriggersTags(Element ispElement, Attribute formula, ILogger<CalcNodeService> _logger)
         {
             string[] triggerAttributesName = ispElement.Attributes.Children(formula.Id).Properties.Item("Триггер").Value.Split(",");
             foreach (var triggerAttributeName in triggerAttributesName)
@@ -110,7 +110,7 @@ namespace ApplicationServices.Calculator
                 TriggerAttributes.Add(item);
             }
         }
-        private void Sort(ILogger<CalcService> _logger)
+        private void Sort(ILogger<CalcNodeService> _logger)
         {
             List<string> addedAttributesIndexes = new List<string>() { };
             List<string> lastAddedAttributesIndexes = new List<string>() { };

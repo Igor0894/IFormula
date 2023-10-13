@@ -2,7 +2,6 @@
 using ApplicationServices.Scheduller.Models;
 using Quartz.Impl;
 using Quartz;
-using System.Text.Json;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Http;
 using Quartz.Impl.Matchers;
@@ -12,15 +11,15 @@ using System.Text;
 
 namespace ApplicationServices.Services
 {
-    public class ManageNodeService
+    public class NodesManagerService
 #nullable disable
     {
         private IJobFactory JobFactory { get; set; }
-        private ILogger<CalcService> Logger { get; set; }
+        private ILogger<CalcNodeService> Logger { get; set; }
         private CalcServiceCollector CalcServiceCollector { get; set; }
         private IScheduler scheduler;
         private SemaphoreSlim recalcSemaphore = new SemaphoreSlim(1, 1);
-        public ManageNodeService(IJobFactory jobFactory, ILogger<CalcService> logger, CalcServiceCollector calcServiceCollector)
+        public NodesManagerService(IJobFactory jobFactory, ILogger<CalcNodeService> logger, CalcServiceCollector calcServiceCollector)
         {
             JobFactory = jobFactory;
             Logger = logger;
@@ -95,14 +94,14 @@ namespace ApplicationServices.Services
         public Dictionary<string, string> GetElementCalcAtributesValue(string elementName)
         {
             Dictionary<string, string> elementAtributes;
-            CalcService calcService = CalcServiceCollector.GetCalcServiceByElementName(elementName);
+            CalcNodeService calcService = CalcServiceCollector.GetCalcServiceByElementName(elementName);
             elementAtributes = calcService.GetElementCalcAtributesValue(elementName);
             return elementAtributes;
         }
         private async Task StartRecalcNode(string name, DateTime start, DateTime end)
         {
             await recalcSemaphore.WaitAsync();
-            CalcService calcService = await GetCalcServiceForRecalc(name);
+            CalcNodeService calcService = await GetCalcServiceForRecalc(name);
             calcService.RecalcNode(start, end);
             recalcSemaphore.Release();
         }
@@ -165,7 +164,7 @@ namespace ApplicationServices.Services
             string json = JsonConvert.SerializeObject(Nodes, Formatting.Indented);
             File.WriteAllText("Nodes.json", json, Encoding.UTF8);
         }
-        private async Task<CalcService> GetCalcServiceForRecalc(string name)
+        private async Task<CalcNodeService> GetCalcServiceForRecalc(string name)
         {
             CalcNode[] Nodes = GetNodesFromFile();
             CalcNode node = default!;
@@ -174,7 +173,7 @@ namespace ApplicationServices.Services
                 throw new Exception("Указанный узел расчёта отсутствует в конфигурационном файле");
             }
             node = Nodes.Where(n => n.SearchAttribute == name).FirstOrDefault()!;
-            CalcService calcService = await CalcServiceCollector.GetRecalcCalcService(node);
+            CalcNodeService calcService = await CalcServiceCollector.GetRecalcCalcService(node);
             return calcService;
         }
     }

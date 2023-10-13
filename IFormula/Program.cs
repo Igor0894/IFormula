@@ -24,8 +24,8 @@ builder.Services.AddTransient<ExceptionsMiddleware>();
 builder.Services.AddSingleton<IJobFactory,JobFactory>();
 builder.Services.AddSingleton<CalcServiceCollector>();
 builder.Services.AddSingleton<ISchedulerFactory, StdSchedulerFactory>();
-builder.Services.AddSingleton<ManageNodeService>();
-builder.Services.AddSingleton<FormulaConfiguratorService>();
+builder.Services.AddSingleton<NodesManagerService>();
+builder.Services.AddSingleton<ElementsConfiguratorService>();
 builder.Services.AddSingleton(w => new TsdbClient(builder.Configuration.GetSection("TsdbSettings").Get<TsdbSettings>()));
 builder.Services.AddHostedService<QuartzHostedService>();
 builder.Services.AddCors(options =>

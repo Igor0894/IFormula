@@ -32,7 +32,7 @@ namespace ApplicationServices.Calculator
         private Dictionary<string, Value_Type> triggersTypes;
         private DateTime lastSubscriptionDataLoad;
         private static int MaxCountPointsInBufferForTag = 200;
-        public TriggerCalcsHandler(ILogger<CalcsHandler> logger, ILogger<CalcService> calcServiceLogger) : base(logger, calcServiceLogger)
+        public TriggerCalcsHandler(ILogger<CalcsHandler> logger, ILogger<CalcNodeService> calcServiceLogger) : base(logger, calcServiceLogger)
         {
             CalcServiceLogger = calcServiceLogger;
         }

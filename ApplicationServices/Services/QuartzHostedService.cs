@@ -17,7 +17,7 @@ namespace ApplicationServices.Services;
 public class QuartzHostedService : IHostedService
 #nullable disable
 {
-    ILogger<CalcService> Logger { get; set; }
+    ILogger<CalcNodeService> Logger { get; set; }
     CalcServiceCollector CalcServiceCollector { get; set; }
     private readonly ISchedulerFactory schedulerFactory;
     private readonly IJobFactory jobFactory;
@@ -26,7 +26,7 @@ public class QuartzHostedService : IHostedService
     public QuartzHostedService(
         ISchedulerFactory schedulerFactory,
         IJobFactory jobFactory,
-        ILogger<CalcService> logger,
+        ILogger<CalcNodeService> logger,
         CalcServiceCollector calcServiceCollector)
     {
         this.schedulerFactory = schedulerFactory;

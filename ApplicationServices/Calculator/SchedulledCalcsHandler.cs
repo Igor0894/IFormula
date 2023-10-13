@@ -23,7 +23,7 @@ namespace ApplicationServices.Calculator
     public class SchedulledCalcsHandler : CalcsHandler
 #nullable disable
     {
-        public SchedulledCalcsHandler(ILogger<CalcsHandler> logger, ILogger<CalcService> calcServiceLogger) : base(logger, calcServiceLogger)
+        public SchedulledCalcsHandler(ILogger<CalcsHandler> logger, ILogger<CalcNodeService> calcServiceLogger) : base(logger, calcServiceLogger)
         {
             
         }

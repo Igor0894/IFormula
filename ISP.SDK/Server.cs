@@ -24,5 +24,11 @@ namespace ISP.SDK
             Elements elements = data.GetElements(modelName, elementPath, elementTemplateName, attributeName, hierarchy, ConnectionString);
             return elements;
         }
+        public Element GetElement(Guid elementId)
+        {
+            SQLDataInElements data = new SQLDataInElements();
+            Element element = data.GetElement(elementId, ConnectionString);
+            return element;
+        }
     }
 }
