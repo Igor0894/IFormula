@@ -194,13 +194,9 @@ namespace ApplicationServices.Calculator
                 {
                     foreach (CalcAttribute triggerAttribute in element.TriggerAttributes)
                     {
-                        await TakeTriggersValuesAndRunCalcsForTag(startTime, endTime, triggerAttribute.OutDataSource.Name);
+                        await TakeTriggersValuesAndRunCalcsForTag(startTime, endTime, triggerAttribute.OutDataSource.Name, element);
                     }
                 });
-                /*await Parallel.ForEachAsync(subscriptionTags, async (tag, token) =>
-                {
-                    await TakeTriggersValuesAndRunCalcsForTag(startTime, endTime, tag);
-                });*/
                 log.Append(string.Join("", calcLog));
                 if (ValuesForWrite.Count > 0)
                 {
@@ -218,7 +214,7 @@ namespace ApplicationServices.Calculator
                 SendLog(log.ToString(), true);
             }
         }
-        private async Task TakeTriggersValuesAndRunCalcsForTag(DateTime startTime, DateTime endTime, string tagName)
+        private async Task TakeTriggersValuesAndRunCalcsForTag(DateTime startTime, DateTime endTime, string tagName, CalcElement element)
         {
             List<TSDBValue> values = new List<TSDBValue>();
             if (triggersTypes[tagName].ToString() == Value_Type.DOUBLE.ToString())
@@ -238,19 +234,9 @@ namespace ApplicationServices.Calculator
                 values = await TSDB.TsdbClient.GetTakeFrameByTag<string>(tagName, startTime, endTime);
             }
             var sortedValues = values.GroupBy(p => p.Timestamp).Select(g => g.First()).OrderBy(t => t.Timestamp).ToList();
-            foreach (var element in CalcElements)
+            foreach (TSDBValue value in sortedValues)
             {
-                if (element.TriggerAttributes.Any(a => a.OutDataSource.Name == tagName))
-                {
-                    foreach (TSDBValue value in sortedValues)
-                    {
-                        lock (logMutex)
-                        {
-                            calcLog.Add($"\r\nЗапуск расчета {value.Timestamp}\r\n");
-                        }
-                        CalculateElement(element, value.Timestamp);
-                    }
-                }
+                CalculateElement(element, value.Timestamp);
             }
         }
     }

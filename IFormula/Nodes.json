@@ -1,6 +1,6 @@
 [
   {
-    "SearchAttribute": "CENG.Формула",
+    "SearchAttribute": "CENG.Стратсырье",
     "SearchModel": "*",
     "SearchTemplate": "*",
     "cronExpression": "30 0/1 * ? * *"

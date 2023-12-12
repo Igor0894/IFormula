@@ -137,6 +137,10 @@ namespace Interpreter.Delegates
                     calculationBasis.ToLower() == "event" ? CalculationBasis.EventWeighted : CalculationBasis.TimeWeighted).Result.Value);
             return average;
         }
+        public static double TagMean(string tagName, object startTime, object endTime)
+        {
+            return TagAvg(tagName, startTime, endTime);
+        }
         public static double TagMax(string tagName, object startTime, object endTime, string calculationBasis = "event")
         {
             if (!DateTime.TryParse(startTime.ToString(), out DateTime st))
@@ -169,6 +173,10 @@ namespace Interpreter.Delegates
             total = Convert.ToInt32(TsdbClient.Summary(tagName, st, et, SummaryType.Count,
                     calculationBasis.ToLower() == "event" ? CalculationBasis.EventWeighted : CalculationBasis.TimeWeighted).Result.Value);
             return total;
+        }
+        public static int EventCount(string tagName, object startTime, object endTime)
+        {
+            return TagCount(tagName, startTime, endTime);
         }
         private static Value_Type GetValueType(string tagName)
         {

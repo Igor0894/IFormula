@@ -118,7 +118,7 @@ namespace ApplicationServices.Calculator
         {
             BlockingCollection<string> innerLog = new()
             {
-                $"---------------------Элемент {element.Name} с меткой времени {ts}\n"
+                $"---------------------Элемент {element.Name} запускается на метку времени {ts}\n"
             };
             element.Interpreter.CurrentTime = ts;
             foreach (List<CalcAttribute> calcItems in element.Queue)
@@ -127,6 +127,7 @@ namespace ApplicationServices.Calculator
             }
             lock (logMutex)
             {
+                innerLog.Add("\r\n");
                 calcLog.AddRange(innerLog);
             }
             

@@ -106,9 +106,5 @@
                 throw new Exception("Неверный формат даты");
             return (timeStamp - timeStamp.Date).TotalSeconds;
         }
-        public static DateTime operator +(DateTime baseTime, string addingTime)
-        {
-            return double.Parse(result1.Value.ToString()) + double.Parse(result2.Value.ToString());
-        }
     }
 }
