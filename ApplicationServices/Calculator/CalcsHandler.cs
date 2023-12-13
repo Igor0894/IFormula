@@ -178,7 +178,8 @@ namespace ApplicationServices.Calculator
             try
             {
                 attribute.Value = element.Interpreter.Eval(attribute.Expression.ToLower());
-                string log = "[Очередь №" + attribute.Order + "] Атрибут: " + attribute.Name + " | Функция: " + attribute.Expression + " | Результат: " + attribute.Value;
+                string logValue = attribute.Value.ToString() == double.MinValue.ToString() ? "NoOutput" : attribute.Value.ToString();
+                string log = "[Очередь №" + attribute.Order + "] Атрибут: " + attribute.Name + " | Функция: " + attribute.Expression + " | Результат: " + logValue;
                 DateTime ts;
                 if (attribute.Value.ToString() == (double.MinValue + 1).ToString()) state.Break(); //Exit
                 if (!string.IsNullOrEmpty(attribute.OutDataSource.Name) && attribute.Value.ToString() != double.MinValue.ToString()) //NoOutput
