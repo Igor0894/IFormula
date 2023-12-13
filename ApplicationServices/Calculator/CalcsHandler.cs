@@ -101,6 +101,7 @@ namespace ApplicationServices.Calculator
             Dictionary<string, Value_Type> tags = new Dictionary<string, Value_Type>();
             foreach (var tag in subscriptionTags)
             {
+                if (tags.ContainsKey(tag)) continue;
                 try
                 {
                     string typeString = await TSDB.TsdbClient.GetMetaAttribute(tag, "Value_Type");

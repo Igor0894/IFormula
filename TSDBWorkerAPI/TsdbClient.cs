@@ -376,7 +376,7 @@ namespace TSDBWorkerAPI
                 return V;
             }
             else
-                return null;
+                throw new Exception($"Ошибка: {response.ErrorMessage}{response.ErrorException} \rв чтении ответа: {response.Content.Replace("\"", "")} на запрос Summary: {body}");
         }
         public async Task<Guid> GetFirstSubscriptionGuid(string[] tags, TimeSpan timeToLive, int maxCountPointsInBuffer)
         {
