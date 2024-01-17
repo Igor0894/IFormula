@@ -64,7 +64,7 @@ namespace ApplicationServices.Calculator
                         if(element.SuccessSorted)
                         {
                             CalcElements.Add(element);
-                            TotalCalcAttributes += element.Attributes.Count;
+                            TotalCalcAttributes += element.CalcAttributes.Count;
                         }
                         else
                         {

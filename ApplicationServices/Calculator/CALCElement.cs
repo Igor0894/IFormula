@@ -4,6 +4,7 @@ using ISP.SDK.IspObjects;
 using Attribute = ISP.SDK.IspObjects.Attribute;
 using Microsoft.Extensions.Logging;
 using System.Collections.Concurrent;
+using Interpreter;
 using System.Configuration;
 using System.Text.RegularExpressions;
 using System.Linq;
@@ -23,7 +24,7 @@ namespace ApplicationServices.Calculator
         {
             ConnectionString = CalcNodeService.ConnectionString
         };
-        public BlockingCollection<CalcAttribute> Attributes = new();
+        public BlockingCollection<CalcAttribute> CalcAttributes = new();
         public BlockingCollection<CalcAttribute> TriggerAttributes = new();
         public List<List<CalcAttribute>> Queue = new();
         public bool SuccessSorted { get; set; }
@@ -66,21 +67,22 @@ namespace ApplicationServices.Calculator
                         }
                     }
                 };
-                Attributes.Add(item);
+                CalcAttributes.Add(item);
             }
             foreach (Attribute attribute in ispElement.Attributes) //Определение переменных из атрибутов элемента ISP
             {
                 string path = "'" + attribute.Path + "'";
-                string variable = string.Empty;
-                foreach (CalcAttribute item in Attributes)
+                string variableName = string.Empty;
+                foreach (CalcAttribute item in CalcAttributes)
                 {
                     if (!item.Expression.Contains(path)) continue;
-                    if (string.IsNullOrEmpty(variable))
+                    if (string.IsNullOrEmpty(variableName))
                     {
-                        variable = Interpreter.GetVariableName();
-                        Interpreter.SetVariable(variable, attribute.Value);
+                        variableName = Interpreter.GetVariableName();
+                        Variable variable = new Variable(attribute);
+                        Interpreter.SetVariable(variableName, variable);
                     }
-                    item.Expression = item.Expression.Replace(path, variable);
+                    item.Expression = item.Expression.Replace(path, variableName);
                 }
             }
             Sort(_logger);
@@ -119,9 +121,9 @@ namespace ApplicationServices.Calculator
             {
                 sorted = true;
                 bool changed = false;
-                for (int i = 0; i < Attributes.Count; i++) //Определение переменных из атрибутов CENG.Формула
+                for (int i = 0; i < CalcAttributes.Count; i++) //Определение переменных из атрибутов CENG.Формула
                 {
-                    for (int j = 0; j < Attributes.Count; j++)
+                    for (int j = 0; j < CalcAttributes.Count; j++)
                     {
                         changed = MapCalcAttributeAndChangeOrder(i, j);
                         if (changed) 
@@ -147,25 +149,25 @@ namespace ApplicationServices.Calculator
                     if (changed) { break; }
                 }
             }
-            if (Attributes.Count > 1)
+            if (CalcAttributes.Count > 1)
             {
-                for (int order = Attributes.Min(item => item.Order); order <= Attributes.Max(item => item.Order); order++)
+                for (int order = CalcAttributes.Min(item => item.Order); order <= CalcAttributes.Max(item => item.Order); order++)
                 {
-                    List<CalcAttribute> calcItems = Attributes.ToArray().Where(item => item.Order == order).ToList();
+                    List<CalcAttribute> calcItems = CalcAttributes.ToArray().Where(item => item.Order == order).ToList();
                     Queue.Add(calcItems);
                 }
             }
-            else if (Attributes.Count == 1)
+            else if (CalcAttributes.Count == 1)
             {
-                List<CalcAttribute> calcItems = new() { Attributes.ToArray()[0] };
+                List<CalcAttribute> calcItems = new() { CalcAttributes.ToArray()[0] };
                 Queue.Add(calcItems);
             }
             SuccessSorted = true;
         }
         private bool MapCalcAttributeAndChangeOrder(int i, int j)
         {
-            CalcAttribute itemJ = Attributes.ToArray()[j];
-            CalcAttribute itemI = Attributes.ToArray()[i];
+            CalcAttribute itemJ = CalcAttributes.ToArray()[j];
+            CalcAttribute itemI = CalcAttributes.ToArray()[i];
             string path = "[" + itemJ.Name + "]";
             bool changed = false;
             if (string.IsNullOrEmpty(itemJ.Variable))

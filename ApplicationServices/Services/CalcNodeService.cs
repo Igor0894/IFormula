@@ -45,7 +45,7 @@ namespace ApplicationServices.Services
         {
             Dictionary<string, string> atributesValue = new Dictionary<string, string>();
             CalcElement calcElement = GetCalcElementByName(elementName);
-            foreach(var atribute in calcElement.Attributes)
+            foreach(var atribute in calcElement.CalcAttributes)
             {
                 atributesValue.Add(atribute.Name, atribute.Value.ToString());
             }

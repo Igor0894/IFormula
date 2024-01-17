@@ -1,6 +1,7 @@
 ﻿using Interpreter.TsdbObjects;
 using TSDBWorkerAPI.Models;
 using TSDBWorkerAPI;
+using Newtonsoft.Json.Linq;
 
 namespace Interpreter.Delegates
 {
@@ -64,27 +65,39 @@ namespace Interpreter.Delegates
                 await TsdbClient.WriteStringVals(valuesForWrite);
             }
         }
-        public static TsdbValue TagVal(string tagName, object timeStamp = null, string method = "ExactOrPrev")
+        public static TsdbValue TagVal(Variable variable, object timeStamp = null, string method = "ExactOrPrev")
         {
-            if (string.IsNullOrEmpty(tagName)) { throw new Exception("Не указано имя тега"); }
-            if(!methods.ContainsKey(method.ToLower())) { throw new Exception($"Не распознан метод получения значения: {method}"); }
-            TsdbValue tsdbesult = new TsdbValue();
-            DateTime ts =DateTime.MinValue;
-            if (timeStamp is null || !DateTime.TryParse(timeStamp.ToString(), out ts))
-                throw new Exception("Неверный формат даты");
-            Dictionary<string, List<TSDBValue>> tsdbValues = GetTSDBValues(tagName, ts, method);
-            if (tsdbValues.Values.Count > 0 && tsdbValues.Values.FirstOrDefault().Count > 0)
+            if(variable.ValueType == VariableValueType.TSDB)
             {
-                TSDBValue tsdbValue = tsdbValues.Values.FirstOrDefault()[0];
-                tsdbesult.Value = tsdbValue.Value;
-                tsdbesult.Digital = tsdbValue.DigitalSetValue;
-                tsdbesult.Time = tsdbValue.Timestamp;
-                tsdbesult.Good = tsdbValue.Quality == Quality.good ? true : false;
-                return tsdbesult;
+                string tagName = variable.Value.ToString();
+                if (string.IsNullOrEmpty(tagName)) { throw new Exception("Не указано имя тега"); }
+                if (!methods.ContainsKey(method.ToLower())) { throw new Exception($"Не распознан метод получения значения: {method}"); }
+                TsdbValue tsdbesult = new TsdbValue();
+                DateTime ts = DateTime.MinValue;
+                if (timeStamp is null || !DateTime.TryParse(timeStamp.ToString(), out ts))
+                    throw new Exception("Неверный формат даты");
+                Dictionary<string, List<TSDBValue>> tsdbValues = GetTSDBValues(tagName, ts, method);
+                if (tsdbValues.Values.Count > 0 && tsdbValues.Values.FirstOrDefault().Count > 0)
+                {
+                    TSDBValue tsdbValue = tsdbValues.Values.FirstOrDefault()[0];
+                    tsdbesult.Value = tsdbValue.Value;
+                    tsdbesult.Digital = tsdbValue.DigitalSetValue;
+                    tsdbesult.Time = tsdbValue.Timestamp;
+                    tsdbesult.Good = tsdbValue.Quality == Quality.good ? true : false;
+                    return tsdbesult;
+                }
+                else
+                {
+                    throw new Exception($"Отсутствуют значения тега {tagName} на метку времени {timeStamp} методом поиска {method}");
+                }
             }
             else
             {
-                throw new Exception($"Отсутствуют значения тега {tagName} на метку времени {timeStamp} методом поиска {method}");
+                return new TsdbValue()
+                {
+                    Value = variable.Value,
+                    Good = true
+                };
             }
         }
         public static TAGInfo TagInfo(string tagName)

@@ -8,6 +8,7 @@
                 return trueCondition;
             return falseCondition;
         }
+        }
         public static int Floor(object input)
         {
             return Convert.ToInt32(Math.Round(decimal.Parse(input.ToString())));

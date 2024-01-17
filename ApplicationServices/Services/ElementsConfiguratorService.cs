@@ -36,7 +36,7 @@ namespace ApplicationServices.Services
                 if (element.Id == elementId.ToString())
                 {
                     CalcElement calcElement = element;
-                    foreach (var atribute in calcElement.Attributes)
+                    foreach (var atribute in calcElement.CalcAttributes)
                     {
                         atributesValue.Add(atribute.Name, atribute.Value.ToString());
                     }

@@ -3,7 +3,7 @@
 namespace ISP.SDK.IspObjects
 {
     [ComVisible(false)]
-    public static class AttributeValueType
+    public static class AttributeValueTypes
     {
         public static readonly string PI = "PI";
         public static readonly string SQL = "SQL";
@@ -18,6 +18,5 @@ namespace ISP.SDK.IspObjects
         public static readonly string TSDB = "TSDB";
         public static readonly string Attribute = "Attribute";
         public static readonly string PIPE = "PIPE";
-
     }
 }

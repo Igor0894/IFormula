@@ -39,9 +39,13 @@ namespace Interpreter
             interpreter.SetVariable("exit", double.MinValue + 1, typeof(double));
             interpreter.SetVariable("nooutput", double.MinValue, typeof(double));
         }
-        public void SetVariable(string name, object value)
+        public void SetVariable(string name, Variable variable)
         {
-            interpreter.SetVariable(name, value, value.GetType());
+            interpreter.SetVariable(name, variable, typeof(Variable));
+        }
+        public void SetVariable(string name, object variable)
+        {
+            interpreter.SetVariable(name, variable, variable.GetType());
         }
         public string GetVariableName()
         {

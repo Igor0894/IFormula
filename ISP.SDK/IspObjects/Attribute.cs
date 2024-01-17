@@ -24,7 +24,7 @@ namespace ISP.SDK.IspObjects
             get => GetValue();
             set { _sqlvalue = value; }
         }
-        public string ValueType { get; set; }
+        public AttributeValueType ValueType { get; set; }
         public Attributes Children { get; set; } = new Attributes();
         private XmlElement GetXmlElement(string xml)
         {

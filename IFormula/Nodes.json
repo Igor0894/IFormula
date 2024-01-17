@@ -1,6 +1,6 @@
 [
   {
-    "SearchAttribute": "CENG.ДБК",
+    "SearchAttribute": "Формула.Тест",
     "SearchModel": "*",
     "SearchTemplate": "*",
     "cronExpression": "30 0/1 * ? * *"

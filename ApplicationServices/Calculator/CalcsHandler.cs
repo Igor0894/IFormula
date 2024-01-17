@@ -13,6 +13,7 @@ using Attribute = ISP.SDK.IspObjects.Attribute;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
 using System.Linq;
+using Interpreter;
 
 namespace ApplicationServices.Calculator
 {
@@ -60,7 +61,7 @@ namespace ApplicationServices.Calculator
             if (element.SuccessSorted)
             {
                 CalcElements.Add(element);
-                TotalCalcAttributes += element.Attributes.Count;
+                TotalCalcAttributes += element.CalcAttributes.Count;
             }
             else
             {
@@ -75,7 +76,7 @@ namespace ApplicationServices.Calculator
             Dictionary<string, Value_Type>  tags = new Dictionary<string, Value_Type>();
             foreach(var element in CalcElements)
             {
-                foreach(var item in element.Attributes)
+                foreach(var item in element.CalcAttributes)
                 {
                     if (item.OutDataSource.Type == AttributeValueType.TSDB && !string.IsNullOrEmpty(item.OutDataSource.Name) && !tags.ContainsKey(item.OutDataSource.Name))
                     {

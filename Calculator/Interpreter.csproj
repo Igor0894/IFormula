@@ -13,6 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\ISP.SDK\ISP.SDK.csproj" />
     <ProjectReference Include="..\TSDBWorkerAPI\TSDBWorkerAPI.csproj" />
   </ItemGroup>
 

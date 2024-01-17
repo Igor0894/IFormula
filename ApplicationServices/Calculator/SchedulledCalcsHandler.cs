@@ -53,11 +53,11 @@ namespace ApplicationServices.Calculator
                     if (!element.IsTriggerSchedulle && element.SuccessSorted)
                     {
                         CalcElements.Add(element);
-                        TotalCalcAttributes += element.Attributes.Count;
+                        TotalCalcAttributes += element.CalcAttributes.Count;
                     }
                     if (element.SuccessSorted)
                     {
-                        TotalCalcAttributes += element.Attributes.Count;
+                        TotalCalcAttributes += element.CalcAttributes.Count;
                     }
                     else
                     {

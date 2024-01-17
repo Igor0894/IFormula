@@ -63,7 +63,7 @@ namespace ISP.SDK
                             Name = dr["AttributeName"].ToString(),
                             Path = dr["AttributePath"].ToString(),
                             DataReference = dr["AttributeDataReferenceProperties"].ToString(),
-                            ValueType = dr["AttributeDataReferenceType"].ToString(),
+                            ValueType = (AttributeValueType)Enum.Parse(typeof(AttributeValueType), dr["AttributeDataReferenceType"].ToString()),
                             Value = dr["AttributeValue"].ToString()
                         });
                     }
@@ -100,7 +100,7 @@ namespace ISP.SDK
                             Name = dr["AttributeName"].ToString(),
                             Path = dr["AttributePath"].ToString(),
                             DataReference = dr["AttributeDataReferenceProperties"].ToString(),
-                            ValueType = dr["AttributeDataReferenceType"].ToString(),
+                            ValueType = (AttributeValueType)Enum.Parse(typeof(AttributeValueType), dr["AttributeDataReferenceType"].ToString()),
                             Value = dr["AttributeValue"].ToString()
                         });
                     }
